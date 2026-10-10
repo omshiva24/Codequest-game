@@ -13,4 +13,4 @@ fi
 export PATH="$FLUTTER_DIR/bin:$PATH"
 flutter config --no-analytics --enable-web > /dev/null
 flutter --version
-flutter pub get --enforce-lockfile
+flutter pub get
