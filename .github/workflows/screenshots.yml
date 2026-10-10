@@ -32,7 +32,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter build web --release --no-web-resources-cdn
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Install browser tools
