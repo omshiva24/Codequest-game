@@ -181,6 +181,7 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
                         hit: _enemyHit,
                         status: Semantics(
                           label: '${_enemy.name} health',
+                          container: true,
                           value: '${(enemyHp * 100).round()} percent',
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(999),
