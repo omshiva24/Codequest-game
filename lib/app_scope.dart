@@ -28,6 +28,7 @@ class AppScope extends InheritedNotifier<ProgressController> {
 }
 
 /// True when the player (or their device) asked for less motion.
-bool reduceMotionOf(BuildContext context) =>
-    MediaQuery.of(context).disableAnimations ||
-    AppScope.watch(context).settings.reduceMotion;
+/// Use `listen: false` inside callbacks.
+bool reduceMotionOf(BuildContext context, {bool listen = true}) =>
+    MediaQuery.disableAnimationsOf(context) ||
+    (listen ? AppScope.watch(context) : AppScope.read(context)).settings.reduceMotion;

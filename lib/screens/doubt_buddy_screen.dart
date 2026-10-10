@@ -101,7 +101,7 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
   void _scrollToEnd() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients) return;
-      final reduceMotion = MediaQuery.disableAnimationsOf(context);
+      final reduceMotion = reduceMotionOf(context, listen: false);
       final target = _scroll.position.maxScrollExtent;
       if (reduceMotion) {
         _scroll.jumpTo(target);

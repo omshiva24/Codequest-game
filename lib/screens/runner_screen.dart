@@ -87,7 +87,7 @@ class _RunnerScreenState extends State<RunnerScreen> with TickerProviderStateMix
         ..duration = duration
         ..forward(from: 0);
     }
-    if (MediaQuery.disableAnimationsOf(context)) {
+    if (reduceMotionOf(context, listen: false)) {
       _scroll.stop();
     } else {
       _scroll.repeat();
@@ -333,7 +333,7 @@ class _RunnerScreenState extends State<RunnerScreen> with TickerProviderStateMix
   Widget _buildTrack(BuildContext context, PlayQuestion q, double height) {
     final g = GameColors.of(context);
     final color = widget.level.lang.color;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final reduceMotion = reduceMotionOf(context);
     final staticGates = reduceMotion || _timerMode == TimerMode.off;
     final last = _last;
 
