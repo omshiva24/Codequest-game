@@ -1,0 +1,12 @@
+{
+  "name": "codequest-api",
+  "private": true,
+  "description": "Serverless API for CodeQuest (AI Doubt Buddy). No runtime dependencies.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test \"api-tests/*.test.js\""
+  }
+}

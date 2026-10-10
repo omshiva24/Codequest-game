@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    $FLUTTER_BASE_HREF is replaced by `flutter build web --base-href`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CodeQuest: learn Python, C, C++ and Java by playing runner, battle and puzzle mini-games, with a Doubt Buddy that answers your questions.">
+  <meta name="theme-color" content="#0E1630">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="CodeQuest">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <title>CodeQuest - Learn to Code by Playing</title>
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #0E1630; color: #FFFFFF; font-family: system-ui, sans-serif; }
+    #loading { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    #loading .logo { font-size: 64px; }
+    #loading .bar { width: 180px; height: 8px; border-radius: 99px; background: #223066; overflow: hidden; }
+    #loading .bar::after { content: ""; display: block; width: 40%; height: 100%; background: #FFD447; border-radius: 99px; animation: slide 1.2s ease-in-out infinite; }
+    @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+    @media (prefers-reduced-motion: reduce) { #loading .bar::after { animation: none; width: 100%; } }
+  </style>
+</head>
+<body>
+  <div id="loading" role="status" aria-live="polite">
+    <div class="logo" aria-hidden="true">🦉</div>
+    <div>Loading CodeQuest&hellip;</div>
+    <div class="bar" aria-hidden="true"></div>
+  </div>
+  <noscript>CodeQuest needs JavaScript to run. Please enable it and reload the page.</noscript>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
