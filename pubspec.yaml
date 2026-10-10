@@ -1,0 +1,33 @@
+name: codequest
+description: "CodeQuest - learn Python, C, C++ and Java by playing runner, battle and puzzle mini-games."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+# Kept deliberately small: fewer packages = smaller attack surface.
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  # Fonts are bundled (not fetched from a CDN) so the app works offline and
+  # needs no third-party font requests. Licenses: assets/fonts/*.txt
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+    - family: CodeMono
+      fonts:
+        - asset: assets/fonts/DejaVuSansMono.ttf
