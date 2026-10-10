@@ -52,6 +52,7 @@ class HeartsBar extends StatelessWidget {
     final g = GameColors.of(context);
     return Semantics(
       label: '$lives of $max hearts left',
+      container: true,
       child: ExcludeSemantics(
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -84,6 +85,7 @@ class StarRow extends StatelessWidget {
     final g = GameColors.of(context);
     return Semantics(
       label: '$stars of 3 stars',
+      container: true,
       child: ExcludeSemantics(
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -121,6 +123,7 @@ class StatPill extends StatelessWidget {
     final g = GameColors.of(context);
     return Semantics(
       label: semanticLabel,
+      container: true,
       child: ExcludeSemantics(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

@@ -72,8 +72,10 @@ void main() {
     await tester.tap(find.text('Hello, Python!'));
     await tester.pumpAndSettle();
     expect(find.text('Talking to the computer'), findsOneWidget);
+    await tester.ensureVisible(find.text('Start Code Runner'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Start Code Runner'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(RunnerScreen), findsOneWidget);
   });
 
@@ -159,9 +161,13 @@ void main() {
     await pumpScreen(tester, PuzzleScreen(level: level, random: Random(5)));
     for (var p = 0; p < level.puzzles.length; p++) {
       for (final line in level.puzzles[p].lines) {
-        await tester.tap(semantics('^Add block: ${esc(line.trim())}( \\(indented\\))?\$').first);
+        final block = semantics('^Add block: ${esc(line.trim())}( \\(indented\\))?\$').first;
+        await tester.ensureVisible(block);
+        await tester.pump();
+        await tester.tap(block);
         await tester.pump();
       }
+      await tester.ensureVisible(find.text('Check'));
       await tester.tap(find.text('Check'));
       await tester.pump();
       expect(find.text('Program works!'), findsOneWidget);
