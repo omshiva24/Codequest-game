@@ -160,8 +160,9 @@ void main() {
     final level = levelById('py-3')!;
     await pumpScreen(tester, PuzzleScreen(level: level, random: Random(5)));
     for (var p = 0; p < level.puzzles.length; p++) {
-      for (final line in level.puzzles[p].lines) {
-        final block = semantics('^Add block: ${esc(line.trim())}( \\(indented\\))?\$').last;
+      // Block ids are the line positions, so tapping 0, 1, 2... builds the program.
+      for (var i = 0; i < level.puzzles[p].lines.length; i++) {
+        final block = find.byKey(ValueKey('block-$i'));
         await tester.ensureVisible(block);
         await tester.pump();
         await tester.tap(block);

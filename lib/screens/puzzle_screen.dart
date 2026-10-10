@@ -206,7 +206,12 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                     runSpacing: 8,
                     children: [
                       for (final token in _session.pool)
-                        _Block(token: token, color: color, onTap: () => _place(token.id)),
+                        _Block(
+                          key: ValueKey('block-${token.id}'),
+                          token: token,
+                          color: color,
+                          onTap: () => _place(token.id),
+                        ),
                     ],
                   ),
                 const SizedBox(height: 16),
@@ -272,7 +277,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
 }
 
 class _Block extends StatelessWidget {
-  const _Block({required this.token, required this.color, required this.onTap});
+  const _Block({super.key, required this.token, required this.color, required this.onTap});
 
   final PuzzleToken token;
   final Color color;
