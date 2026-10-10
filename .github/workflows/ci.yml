@@ -61,7 +61,7 @@ jobs:
       # Native folders are generated, so the repo stays small and clean.
       - run: flutter create --platforms=android --org io.github.omshiva24 --project-name codequest .
       - run: flutter build apk --release --dart-define=TUTOR_API_BASE=https://codequest-game-amber.vercel.app
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: codequest-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
