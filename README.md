@@ -44,7 +44,7 @@ Stuck? Ask Byte the owl anything — "What is a pointer in C?", "for vs while?",
 | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) | ![Lesson](docs/screenshots/03-lesson.png) |
 | **Code Runner** | **Right answer!** | **Results** |
 | ![Runner](docs/screenshots/04-runner.png) | ![Runner feedback](docs/screenshots/05-runner-correct.png) | ![Results](docs/screenshots/06-results.png) |
-| **Bug Battle** | **Learning from a mistake** | **Block Builder** |
+| **Bug Battle** | **Hit! (with explanation)** | **Block Builder** |
 | ![Battle](docs/screenshots/07-battle.png) | ![Battle feedback](docs/screenshots/08-battle-feedback.png) | ![Puzzle](docs/screenshots/09-puzzle.png) |
 | **Doubt Buddy** | **High-contrast mode** | **Mobile** |
 | ![Doubt Buddy](docs/screenshots/10-doubt-buddy.png) | ![Settings](docs/screenshots/11-settings-high-contrast.png) | ![Mobile](docs/screenshots/12-mobile-home.png) |
