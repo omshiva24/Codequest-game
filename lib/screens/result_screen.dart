@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_scope.dart';
 import '../data/curriculum.dart';
 import '../logic/progress.dart';
 import '../theme/app_theme.dart';
@@ -17,7 +18,7 @@ class ResultScreen extends StatelessWidget {
     final g = GameColors.of(context);
     final level = outcome.level;
     final next = nextLevel(level);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final reduceMotion = reduceMotionOf(context);
 
     return Scaffold(
       appBar: AppBar(

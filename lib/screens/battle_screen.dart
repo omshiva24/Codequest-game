@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../app_scope.dart';
 import '../logic/quiz_session.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
@@ -56,7 +57,7 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
   void _answer(int index) {
     if (_last != null || _session.isOver) return;
     final result = _session.answer(index);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final reduceMotion = reduceMotionOf(context, listen: false);
     setState(() {
       _last = result;
       if (result.correct) {

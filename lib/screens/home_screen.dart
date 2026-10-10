@@ -239,7 +239,9 @@ class WorldCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(lang.tagline, style: TextStyle(color: g.textDim, fontSize: 14)),
                       const SizedBox(height: 8),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        runSpacing: 4,
                         children: [
                           Icon(Icons.star_rounded, color: g.coin, size: 22),
                           const SizedBox(width: 4),
