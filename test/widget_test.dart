@@ -161,7 +161,7 @@ void main() {
     await pumpScreen(tester, PuzzleScreen(level: level, random: Random(5)));
     for (var p = 0; p < level.puzzles.length; p++) {
       for (final line in level.puzzles[p].lines) {
-        final block = semantics('^Add block: ${esc(line.trim())}( \\(indented\\))?\$').first;
+        final block = semantics('^Add block: ${esc(line.trim())}( \\(indented\\))?\$').last;
         await tester.ensureVisible(block);
         await tester.pump();
         await tester.tap(block);

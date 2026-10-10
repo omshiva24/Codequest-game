@@ -1,0 +1,67 @@
+name: Screenshots & demo video
+
+# Builds the web app, plays through it in headless Chrome and commits fresh
+# screenshots + a demo video to docs/. Runs when the app UI changes.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'web/**'
+      - 'tool/screenshots/**'
+      - '.github/workflows/screenshots.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: screenshots
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build web --release --no-web-resources-cdn
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser tools
+        run: |
+          npm i --no-save --no-audit --no-fund puppeteer@24
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji
+      - name: Play the game and take screenshots
+        run: node tool/screenshots/capture.mjs
+        env:
+          WEB_ROOT: build/web
+          OUT_DIR: docs/screenshots
+          FRAMES_DIR: /tmp/frames
+      - name: Make the demo video
+        run: |
+          ffmpeg -y -loglevel error -framerate 8 -pattern_type glob -i '/tmp/frames/*.jpg' \
+            -vf "scale=1280:-2" -c:v libx264 -pix_fmt yuv420p -movflags +faststart docs/demo.mp4
+          ffmpeg -y -loglevel error -framerate 8 -pattern_type glob -i '/tmp/frames/*.jpg' \
+            -vf "fps=6,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer" \
+            docs/demo.gif
+          ls -la docs
+      - name: Commit screenshots and video
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots docs/demo.mp4 docs/demo.gif
+          if git diff --cached --quiet; then
+            echo "No media changes."
+          else
+            git commit -m "docs: update screenshots and demo video [skip ci]"
+            git push
+          fi
