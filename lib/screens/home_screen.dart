@@ -19,9 +19,9 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Semantics(
+        title: Semantics(
           header: true,
-          child: Text('CodeQuest'),
+          child: const Text('CodeQuest'),
         ),
         actions: [
           IconButton(
