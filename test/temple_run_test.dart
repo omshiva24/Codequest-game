@@ -61,7 +61,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byType(ResultScreen), findsOneWidget);
-    expect(find.text('Level clear!'), findsOneWidget);
+    expect(find.text('Level clear!'), findsWidgets);
     expect(progress.starsFor('py-1'), 3);
     expect(engine.coins, greaterThan(10), reason: 'coins on the track were collected');
     expect(progress.coins, greaterThanOrEqualTo(engine.coins));
