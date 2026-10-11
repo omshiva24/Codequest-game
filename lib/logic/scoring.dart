@@ -1,7 +1,7 @@
 /// Pure scoring rules, kept separate from the UI so they are easy to test.
 library;
 
-/// Stars for a quiz-style level (runner or battle).
+/// Stars for a quiz-style level (battle).
 ///
 /// 3 = every answer right first time, 2 = 80%+, 1 = finished the level.
 /// 0 = the player ran out of hearts.
@@ -40,6 +40,9 @@ int coinsFor({required int correct, required int stars}) {
 }
 
 const int xpPerPlayerLevel = 150;
+
+/// Price of the 50/50 power-up, in coins.
+const int fiftyFiftyCost = 15;
 
 int playerLevelFor(int xp) => 1 + (xp < 0 ? 0 : xp) ~/ xpPerPlayerLevel;
 

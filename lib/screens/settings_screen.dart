@@ -150,7 +150,7 @@ class SettingsScreen extends StatelessWidget {
               const Text(
                 'Tab / Shift+Tab: move between buttons\n'
                 'Enter or Space: press the focused button\n'
-                'Code Runner: arrow keys or 1-3 change lane, Space dashes\n'
+                'World Builder: 1-7 fill the blank, R runs the code\n'
                 'Bug Battle: 1-4 pick a move',
                 style: TextStyle(height: 1.6),
               ),

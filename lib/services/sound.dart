@@ -45,10 +45,10 @@ class SoundFx {
   static void _vibrate(Sfx sfx) {
     if (kIsWeb) return;
     final Future<void> Function() haptic = switch (sfx) {
-      Sfx.tap => HapticFeedback.selectionClick,
-      Sfx.correct || Sfx.coin || Sfx.star || Sfx.powerUp => HapticFeedback.lightImpact,
+      Sfx.tap || Sfx.block => HapticFeedback.selectionClick,
+      Sfx.correct || Sfx.coin || Sfx.star || Sfx.powerUp || Sfx.jump => HapticFeedback.lightImpact,
       Sfx.hit || Sfx.victory || Sfx.levelUp || Sfx.badge => HapticFeedback.mediumImpact,
-      Sfx.wrong || Sfx.defeat => HapticFeedback.heavyImpact,
+      Sfx.wrong || Sfx.defeat || Sfx.fall => HapticFeedback.heavyImpact,
     };
     unawaited(haptic());
   }
