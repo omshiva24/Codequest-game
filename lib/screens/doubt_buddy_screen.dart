@@ -221,8 +221,8 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
                         onSubmitted: (_) => _send(),
                         style: TextStyle(color: g.parchmentText, fontSize: 16),
                         decoration: const InputDecoration(
-                          labelText: 'Ask your doubt',
-                          hintText: 'e.g. What does i++ mean?',
+                          labelText: 'Ask your doubt, e.g. What does i++ mean?',
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
                           counterText: '',
                         ),
                       ),

@@ -19,7 +19,7 @@ class WorldScreen extends StatelessWidget {
   final Lang lang;
 
   static const double _spacing = 175;
-  static const double _bottomPad = 120;
+  static const double _bottomPad = 175;
   static const List<double> _xs = [0.3, 0.7, 0.32, 0.68, 0.5];
 
   @override
