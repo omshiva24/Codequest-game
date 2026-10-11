@@ -41,6 +41,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji
       - name: Play the game and take screenshots
+        # Keep whatever was captured even if a late step fails.
+        continue-on-error: true
         run: node tool/screenshots/capture.mjs
         env:
           WEB_ROOT: build/web
@@ -58,6 +60,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f docs/screenshots/zz-error.png
           git add docs/screenshots docs/demo.mp4 docs/demo.gif
           if git diff --cached --quiet; then
             echo "No media changes."
