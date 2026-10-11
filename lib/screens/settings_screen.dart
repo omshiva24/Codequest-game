@@ -65,7 +65,9 @@ class SettingsScreen extends StatelessWidget {
               'Accessibility',
               ButtonTone.sky,
               Icons.accessibility_new_rounded,
-              Column(
+              Material(
+                type: MaterialType.transparency,
+                child: Column(
                 children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
@@ -82,6 +84,7 @@ class SettingsScreen extends StatelessWidget {
                     onChanged: (v) => progress.updateSettings(settings.copyWith(reduceMotion: v)),
                   ),
                 ],
+              ),
               ),
             ),
             section(

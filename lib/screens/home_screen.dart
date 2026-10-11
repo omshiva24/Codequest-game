@@ -273,7 +273,9 @@ class WorldCard extends StatelessWidget {
                               style: TextStyle(color: g.parchmentDim, fontSize: 14),
                             ),
                             const SizedBox(height: 4),
-                            Row(
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              runSpacing: 2,
                               children: [
                                 GameStar(filled: true, size: 18, g: g),
                                 const SizedBox(width: 4),

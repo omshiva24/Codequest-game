@@ -176,7 +176,9 @@ class _BouncingLogoState extends State<_BouncingLogo> with SingleTickerProviderS
       child: ExcludeSemantics(
         child: AnimatedBuilder(
           animation: _c,
-          builder: (context, _) => Row(
+          builder: (context, _) => FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < word.length; i++)
@@ -189,6 +191,7 @@ class _BouncingLogoState extends State<_BouncingLogo> with SingleTickerProviderS
                   ),
                 ),
             ],
+          ),
           ),
         ),
       ),

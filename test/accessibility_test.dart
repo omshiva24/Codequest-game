@@ -39,7 +39,14 @@ Future<void> _pump(WidgetTester tester, Widget home, {bool highContrast = false}
   await tester.pumpWidget(AppScope(
     controller: progress,
     doubtService: DoubtService(),
-    child: MaterialApp(theme: buildTheme(highContrast: highContrast), home: home),
+    child: MaterialApp(
+      theme: buildTheme(highContrast: highContrast),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
+      home: home,
+    ),
   ));
   await tester.pumpAndSettle();
 }
