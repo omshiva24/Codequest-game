@@ -419,7 +419,7 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
                     label: '${_enemy.name} health',
                     value: '${(hp * 100).round()} percent',
                     container: true,
-                    child: _HpBar(value: hp),
+                    child: ExcludeSemantics(child: _HpBar(value: hp)),
                   ),
                 ),
               ),
