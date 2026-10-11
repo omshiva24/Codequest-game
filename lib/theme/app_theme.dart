@@ -1,220 +1,262 @@
 import 'package:flutter/material.dart';
 
-/// Game-specific colours. Every pair used for text was chosen to meet
-/// WCAG AA contrast (4.5:1) - and the high-contrast palette goes further.
+/// CodeQuest's "sticker-book arcade" look.
+///
+/// Everything is a physical toy: thick ink outlines, hard drop "lips" under
+/// buttons and parchment panels for reading. Text that people read always sits
+/// on parchment (ink text) or on a code panel, so contrast stays high (WCAG AA)
+/// even on top of the animated world scenes.
 @immutable
 class GameColors extends ThemeExtension<GameColors> {
   const GameColors({
-    required this.background,
-    required this.card,
-    required this.cardRaised,
-    required this.border,
-    required this.textDim,
-    required this.coin,
-    required this.good,
-    required this.bad,
+    required this.ink,
+    required this.parchment,
+    required this.parchmentShade,
+    required this.parchmentText,
+    required this.parchmentDim,
+    required this.nightTop,
+    required this.nightBottom,
+    required this.onNight,
+    required this.onNightDim,
+    required this.gold,
+    required this.goldLip,
+    required this.mint,
+    required this.mintLip,
+    required this.coral,
+    required this.coralLip,
+    required this.sky,
+    required this.skyLip,
+    required this.lilac,
+    required this.lilacLip,
     required this.codeBackground,
+    required this.codeBar,
     required this.codeText,
-    required this.onAccent,
+    required this.codeDim,
+    required this.disabled,
+    required this.focus,
+    required this.outlineWidth,
+    required this.highContrast,
   });
 
-  final Color background;
-  final Color card;
-  final Color cardRaised;
-  final Color border;
-  final Color textDim;
-  final Color coin;
-  final Color good;
-  final Color bad;
+  /// Outline colour and text colour on light surfaces.
+  final Color ink;
+  final Color parchment;
+  final Color parchmentShade;
+  final Color parchmentText;
+  final Color parchmentDim;
+  final Color nightTop;
+  final Color nightBottom;
+  final Color onNight;
+  final Color onNightDim;
+  final Color gold;
+  final Color goldLip;
+  final Color mint;
+  final Color mintLip;
+  final Color coral;
+  final Color coralLip;
+  final Color sky;
+  final Color skyLip;
+  final Color lilac;
+  final Color lilacLip;
   final Color codeBackground;
+  final Color codeBar;
   final Color codeText;
+  final Color codeDim;
+  final Color disabled;
+  final Color focus;
+  final double outlineWidth;
+  final bool highContrast;
 
-  /// Text colour to use on top of bright accent colours.
-  final Color onAccent;
+  // Older names, kept so shared widgets read naturally.
+  Color get good => mint;
+  Color get bad => coral;
+  Color get coin => gold;
+  Color get onAccent => ink;
 
   static const GameColors normal = GameColors(
-    background: Color(0xFF0E1630),
-    card: Color(0xFF18234D),
-    cardRaised: Color(0xFF223066),
-    border: Color(0xFF34457F),
-    textDim: Color(0xFFC9D2F0),
-    coin: Color(0xFFFFD447),
-    good: Color(0xFF3DDC84),
-    bad: Color(0xFFFF7B7B),
-    codeBackground: Color(0xFF070B1A),
-    codeText: Color(0xFFE6F0FF),
-    onAccent: Color(0xFF0B1024),
+    ink: Color(0xFF2B1840),
+    parchment: Color(0xFFFFF4D6),
+    parchmentShade: Color(0xFFE9C98B),
+    parchmentText: Color(0xFF2B1840),
+    parchmentDim: Color(0xFF5B4470),
+    nightTop: Color(0xFF4A2391),
+    nightBottom: Color(0xFF1B0D40),
+    onNight: Color(0xFFFFFFFF),
+    onNightDim: Color(0xFFEADFFF),
+    gold: Color(0xFFFFC93C),
+    goldLip: Color(0xFFC9781F),
+    mint: Color(0xFF3DDC84),
+    mintLip: Color(0xFF1E8E52),
+    coral: Color(0xFFFF6B7F),
+    coralLip: Color(0xFFB8324A),
+    sky: Color(0xFF5BC0FF),
+    skyLip: Color(0xFF2470B3),
+    lilac: Color(0xFFC3A0FF),
+    lilacLip: Color(0xFF7448C9),
+    codeBackground: Color(0xFF1E1433),
+    codeBar: Color(0xFF2E2050),
+    codeText: Color(0xFFF6EEFF),
+    codeDim: Color(0xFFBBA8DD),
+    disabled: Color(0xFFB9AFC7),
+    focus: Color(0xFFFFFFFF),
+    outlineWidth: 3,
+    highContrast: false,
   );
 
-  static const GameColors highContrast = GameColors(
-    background: Color(0xFF000000),
-    card: Color(0xFF000000),
-    cardRaised: Color(0xFF111111),
-    border: Color(0xFFFFFFFF),
-    textDim: Color(0xFFFFFFFF),
-    coin: Color(0xFFFFFF00),
-    good: Color(0xFF00FF66),
-    bad: Color(0xFFFF8080),
+  static const GameColors highContrastColors = GameColors(
+    ink: Color(0xFF000000),
+    parchment: Color(0xFFFFFFFF),
+    parchmentShade: Color(0xFF000000),
+    parchmentText: Color(0xFF000000),
+    parchmentDim: Color(0xFF000000),
+    nightTop: Color(0xFF000000),
+    nightBottom: Color(0xFF000000),
+    onNight: Color(0xFFFFFFFF),
+    onNightDim: Color(0xFFFFFFFF),
+    gold: Color(0xFFFFE100),
+    goldLip: Color(0xFF000000),
+    mint: Color(0xFF00F07A),
+    mintLip: Color(0xFF000000),
+    coral: Color(0xFFFF8A9A),
+    coralLip: Color(0xFF000000),
+    sky: Color(0xFF6CD3FF),
+    skyLip: Color(0xFF000000),
+    lilac: Color(0xFFD9C2FF),
+    lilacLip: Color(0xFF000000),
     codeBackground: Color(0xFF000000),
+    codeBar: Color(0xFF000000),
     codeText: Color(0xFFFFFFFF),
-    onAccent: Color(0xFF000000),
+    codeDim: Color(0xFFFFFFFF),
+    disabled: Color(0xFFCCCCCC),
+    focus: Color(0xFFFFE100),
+    outlineWidth: 3.5,
+    highContrast: true,
   );
 
   static GameColors of(BuildContext context) =>
       Theme.of(context).extension<GameColors>() ?? normal;
 
   @override
-  GameColors copyWith({
-    Color? background,
-    Color? card,
-    Color? cardRaised,
-    Color? border,
-    Color? textDim,
-    Color? coin,
-    Color? good,
-    Color? bad,
-    Color? codeBackground,
-    Color? codeText,
-    Color? onAccent,
-  }) =>
-      GameColors(
-        background: background ?? this.background,
-        card: card ?? this.card,
-        cardRaised: cardRaised ?? this.cardRaised,
-        border: border ?? this.border,
-        textDim: textDim ?? this.textDim,
-        coin: coin ?? this.coin,
-        good: good ?? this.good,
-        bad: bad ?? this.bad,
-        codeBackground: codeBackground ?? this.codeBackground,
-        codeText: codeText ?? this.codeText,
-        onAccent: onAccent ?? this.onAccent,
-      );
+  GameColors copyWith() => this;
 
   @override
-  GameColors lerp(ThemeExtension<GameColors>? other, double t) {
-    if (other is! GameColors) return this;
-    return GameColors(
-      background: Color.lerp(background, other.background, t)!,
-      card: Color.lerp(card, other.card, t)!,
-      cardRaised: Color.lerp(cardRaised, other.cardRaised, t)!,
-      border: Color.lerp(border, other.border, t)!,
-      textDim: Color.lerp(textDim, other.textDim, t)!,
-      coin: Color.lerp(coin, other.coin, t)!,
-      good: Color.lerp(good, other.good, t)!,
-      bad: Color.lerp(bad, other.bad, t)!,
-      codeBackground: Color.lerp(codeBackground, other.codeBackground, t)!,
-      codeText: Color.lerp(codeText, other.codeText, t)!,
-      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
-    );
-  }
+  GameColors lerp(ThemeExtension<GameColors>? other, double t) =>
+      (other is GameColors && t >= 0.5) ? other : this;
 }
 
 const String codeFont = 'CodeMono';
+const String displayFont = 'Lilita';
+
+/// Big chunky title style (Lilita One).
+TextStyle displayStyle(double size, {Color? color, double height = 1.1}) => TextStyle(
+      fontFamily: displayFont,
+      fontSize: size,
+      height: height,
+      color: color,
+      letterSpacing: 0.4,
+    );
 
 ThemeData buildTheme({required bool highContrast}) {
-  final g = highContrast ? GameColors.highContrast : GameColors.normal;
+  final g = highContrast ? GameColors.highContrastColors : GameColors.normal;
   final scheme = ColorScheme(
-    brightness: Brightness.dark,
-    primary: g.coin,
-    onPrimary: g.onAccent,
-    secondary: highContrast ? const Color(0xFF00FFFF) : const Color(0xFF7FE3FF),
-    onSecondary: g.onAccent,
-    error: g.bad,
-    onError: g.onAccent,
-    surface: g.card,
-    onSurface: Colors.white,
-    surfaceContainerHighest: g.cardRaised,
-    outline: g.border,
+    brightness: Brightness.light,
+    primary: g.gold,
+    onPrimary: g.ink,
+    secondary: g.sky,
+    onSecondary: g.ink,
+    error: g.coralLip,
+    onError: g.parchment,
+    surface: g.parchment,
+    onSurface: g.parchmentText,
+    surfaceContainerHighest: g.parchmentShade,
+    outline: g.ink,
   );
 
   final base = ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     fontFamily: 'Poppins',
-    scaffoldBackgroundColor: g.background,
+    scaffoldBackgroundColor: g.nightBottom,
     extensions: [g],
   );
 
-  final shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(16),
-    side: highContrast ? const BorderSide(color: Colors.white, width: 2) : BorderSide.none,
-  );
+  final inkBorder = BorderSide(color: g.ink, width: g.outlineWidth);
 
   return base.copyWith(
-    textTheme: base.textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
+    textTheme: base.textTheme.apply(bodyColor: g.parchmentText, displayColor: g.parchmentText),
     appBarTheme: AppBarTheme(
-      backgroundColor: g.background,
-      foregroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      foregroundColor: g.onNight,
       elevation: 0,
-      centerTitle: false,
-      titleTextStyle: const TextStyle(
-        fontFamily: 'Poppins',
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-        color: Colors.white,
-      ),
+      scrolledUnderElevation: 0,
+      titleTextStyle: displayStyle(24, color: g.onNight),
     ),
-    cardTheme: CardThemeData(
-      color: g.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: g.border, width: highContrast ? 2 : 1),
-      ),
-      margin: EdgeInsets.zero,
-    ),
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        minimumSize: const Size(64, 52),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        textStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w700),
-        shape: shape,
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(64, 52),
-        foregroundColor: Colors.white,
-        side: BorderSide(color: highContrast ? Colors.white : g.border, width: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        textStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w700),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: g.parchment,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: inkBorder),
+      titleTextStyle: displayStyle(24, color: g.ink),
+      contentTextStyle: TextStyle(fontFamily: 'Poppins', fontSize: 16, color: g.parchmentText),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: g.coin,
+        foregroundColor: g.ink,
         minimumSize: const Size(48, 48),
-        textStyle: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700),
+        textStyle: displayStyle(18),
       ),
     ),
-    // A thick, bright focus ring so keyboard users always see where they are.
-    focusColor: highContrast ? const Color(0x66FFFF00) : const Color(0x557FE3FF),
-    dividerColor: g.border,
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: g.cardRaised,
-      contentTextStyle: const TextStyle(fontFamily: 'Poppins', color: Colors.white),
+      backgroundColor: g.parchment,
+      contentTextStyle: TextStyle(fontFamily: 'Poppins', color: g.parchmentText, fontSize: 15),
       behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: inkBorder),
     ),
     switchTheme: SwitchThemeData(
-      trackOutlineColor: WidgetStatePropertyAll(g.border),
+      thumbColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? g.ink : g.parchment,
+      ),
+      trackColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? g.mint : g.disabled,
+      ),
+      trackOutlineColor: WidgetStatePropertyAll(g.ink),
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        minimumSize: const WidgetStatePropertyAll(Size(48, 52)),
+        side: WidgetStatePropertyAll(inkBorder),
+        textStyle: WidgetStatePropertyAll(displayStyle(17)),
+        foregroundColor: WidgetStatePropertyAll(g.ink),
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? g.gold : g.parchment,
+        ),
+      ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: g.parchment,
+      selectedColor: g.gold,
+      labelStyle: TextStyle(fontFamily: 'Poppins', color: g.ink, fontWeight: FontWeight.w700),
+      side: BorderSide(color: g.ink, width: 2),
+      checkmarkColor: g.ink,
+      shape: const StadiumBorder(),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: g.gold),
+    focusColor: g.focus.withValues(alpha: 0.35),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: g.cardRaised,
-      hintStyle: TextStyle(color: g.textDim),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: g.border),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: g.border, width: highContrast ? 2 : 1),
-      ),
+      fillColor: g.parchment,
+      labelStyle: TextStyle(color: g.parchmentDim, fontWeight: FontWeight.w700),
+      floatingLabelStyle: TextStyle(color: g.ink, fontWeight: FontWeight.w700),
+      hintStyle: TextStyle(color: g.parchmentDim),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: inkBorder),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: inkBorder),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: g.coin, width: 2),
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: g.ink, width: g.outlineWidth + 1.5),
       ),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: g.ink,
+      selectionColor: g.gold.withValues(alpha: 0.6),
     ),
   );
 }

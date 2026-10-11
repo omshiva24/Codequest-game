@@ -14,42 +14,55 @@ Built with **Flutter** (one codebase for web + Android/iOS), deployed on **Verce
 
 ## How it plays
 
+Press **Play** on the title screen, pick a world and climb its winding map. Every level starts with **Byte the owl** explaining the idea in a short dialogue (simple words, example code, key points). Then you play one of three mini-games:
+
 | | Mini-game | Inspired by | What you do |
 |---|---|---|---|
-| 🏃 | **Code Runner** | Temple Run | The answers are gates on a 3-lane track. Switch lanes and run through the right one before the gates reach you. |
-| 👾 | **Bug Battle** | Pokémon | A bug monster attacks. Pick the right "move" (answer) to hit it. Missed questions come back so you can learn and still win. |
-| 🧱 | **Block Builder** | Mario blocks | Tap shuffled code blocks in the right order to build a working program, then press Check. |
+| 🏃 | **Code Runner** | Temple Run | Answers are gates rushing down a 3-lane track. Switch lanes and dash through the right gate before it reaches you. |
+| 👾 | **Bug Battle** | Pokémon | A bug monster attacks. Pick the right move to fire a code bolt at it. Missed questions come back so you can still win. |
+| 🧱 | **Block Builder** | Code editor | Snap shuffled code blocks into the editor in the right order, press **Run code** and watch the program's output appear in the console. |
 
-Each language is a **world** on a Mario-style map with 5 levels — the 5th is a **boss**:
+Each language is a **world** with its own animated scene and 5 levels. The 5th level is a **boss**:
 
-| World | Levels |
-|---|---|
-| 🐍 Python Jungle | Hello Python → Variables & Types → If/Else → Loops → **Boss: Functions** (Bug King) |
-| ⛏️ C Caves | Hello C → Variables & Types → If/Else → Loops → **Boss: Functions** (Segfault Dragon) |
-| 🏰 C++ Castle | Hello C++ → Variables & Types → If/Else → Loops & vectors → **Boss: Classes** (Null Pointer Ghost) |
-| 🌋 Java Volcano | Hello Java → Variables & Types → If/Else → Loops & arrays → **Boss: Methods & Objects** (Exception Hydra) |
+| World | Scene | Levels |
+|---|---|---|
+| 🐍 Python Jungle | Jungle with fireflies and swaying vines | Hello Python → Variables & Types → If/Else → Loops → **Boss: Functions** (Bug King) |
+| 💎 C Caves | Crystal cave with dripping water | Hello C → Variables & Types → If/Else → Loops → **Boss: Functions** (Segfault Dragon) |
+| 🏰 C++ Castle | Castle under the stars, waving flags | Hello C++ → Variables & Types → If/Else → Loops & vectors → **Boss: Classes** (Null Pointer Ghost) |
+| 🌋 Java Volcano | Erupting volcano with rising embers | Hello Java → Variables & Types → If/Else → Loops & arrays → **Boss: Methods & Objects** (Exception Hydra) |
 
-Every level starts with a short **lesson scroll** (simple words + example code + key points). After every answer you get an **explanation**, and the results screen has a **"Learn from your mistakes"** review. You earn **XP, coins, stars and a daily streak**, and finishing a level unlocks the next.
+### What keeps players coming back
+- **Combos:** answer correctly in a row for a combo streak (x2, x3…). Your best combo is saved.
+- **Coins and power-ups:** spend coins on **50/50**, which removes wrong answers. You learn by narrowing down instead of guessing.
+- **Stars, XP, player levels and ranks** (Newbie Coder → Code Wizard), plus a **daily streak**.
+- **11 badges** in the **Trophy room**: First steps, Flawless, Combo king, Curious mind, Boss slayer, Polyglot and more.
+- **Big feedback moments:** confetti, popping stars, count-up rewards, screen shake on mistakes and code bolts in battle. Everything turns off with **Reduce motion**.
+- **8-bit sound effects:** coin pings, battle hits, power-ups, a ping per star and victory/defeat jingles. They are made in code by a tiny synthesizer (Web Audio), so there are no audio files to download. Phones also vibrate. Turn sound off in **Settings → Sound**.
+- **Learning built in:** an explanation after every answer, a "Learn from your mistakes" review, a daily "Did you know?" programming fact, and the puzzle console that shows what your code prints.
 
 ### 🦉 Doubt Buddy (doubt solver)
-Stuck? Ask Byte the owl anything — "What is a pointer in C?", "for vs while?", "Why do I need a semicolon?".
+Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?" or "Why do I need a semicolon?".
 - **Works offline** with a built-in knowledge base of 30+ beginner topics, with examples in the language you pick.
-- **Optional AI tutor**: if a `GEMINI_API_KEY` is set on Vercel, questions go to a secure server function (`/api/ask`) for richer answers. If the AI is unavailable, the offline buddy answers automatically — the player is never left without help.
+- **Optional AI tutor:** if a `GEMINI_API_KEY` is set on Vercel, questions go to a secure server function (`/api/ask`) for richer answers. If the AI is unavailable, the offline buddy answers automatically, so the player is never left without help.
 - Every wrong answer has an **"Ask Doubt Buddy"** button that sends the question and its context.
 
 ## Screenshots
 
-| Home | World map | Lesson |
+| Title screen | Home | World map |
 |---|---|---|
-| ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) | ![Lesson](docs/screenshots/03-lesson.png) |
-| **Code Runner** | **Right answer!** | **Results** |
-| ![Runner](docs/screenshots/04-runner.png) | ![Runner feedback](docs/screenshots/05-runner-correct.png) | ![Results](docs/screenshots/06-results.png) |
-| **Bug Battle** | **Hit! (with explanation)** | **Block Builder** |
-| ![Battle](docs/screenshots/07-battle.png) | ![Battle feedback](docs/screenshots/08-battle-feedback.png) | ![Puzzle](docs/screenshots/09-puzzle.png) |
-| **Doubt Buddy** | **High-contrast mode** | **Mobile** |
-| ![Doubt Buddy](docs/screenshots/10-doubt-buddy.png) | ![Settings](docs/screenshots/11-settings-high-contrast.png) | ![Mobile](docs/screenshots/12-mobile-home.png) |
+| ![Title](docs/screenshots/00-title.png) | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) |
+| **Lesson with Byte** | **Code Runner** | **Right gate!** |
+| ![Lesson](docs/screenshots/03-lesson.png) | ![Runner](docs/screenshots/04-runner.png) | ![Runner feedback](docs/screenshots/05-runner-correct.png) |
+| **Level clear** | **Bug Battle** | **Code bolt attack** |
+| ![Results](docs/screenshots/06-results.png) | ![Battle](docs/screenshots/07-battle.png) | ![Attack](docs/screenshots/08-battle-attack.png) |
+| **Learning from a miss** | **Block Builder** | **Run code: console output** |
+| ![Miss](docs/screenshots/09-battle-miss.png) | ![Puzzle](docs/screenshots/10-puzzle.png) | ![Run](docs/screenshots/11-puzzle-run.png) |
+| **Trophy room** | **Doubt Buddy** | **High-contrast mode** |
+| ![Trophies](docs/screenshots/12-trophies.png) | ![Doubt Buddy](docs/screenshots/13-doubt-buddy.png) | ![High contrast](docs/screenshots/14-high-contrast.png) |
+| **Mobile: title** | **Mobile: home** | **Mobile: map** |
+| ![Mobile title](docs/screenshots/15-mobile-title.png) | ![Mobile home](docs/screenshots/16-mobile-home.png) | ![Mobile map](docs/screenshots/17-mobile-map.png) |
 
-Screenshots and the demo video are produced automatically by [a GitHub Action](.github/workflows/screenshots.yml) that plays the real game in headless Chrome ([tool/screenshots/capture.mjs](tool/screenshots/capture.mjs)).
+Screenshots and the demo video are made automatically by [a GitHub Action](.github/workflows/screenshots.yml) that plays the real game in headless Chrome ([tool/screenshots/capture.mjs](tool/screenshots/capture.mjs)).
 
 ---
 
@@ -64,7 +77,7 @@ Screenshots and the demo video are produced automatically by [a GitHub Action](.
 - **Security headers** on every response ([`vercel.json`](vercel.json)): strict **Content-Security-Policy** (no inline scripts, no third-party scripts), HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy, COOP/CORP.
 - **No third-party CDNs:** the Flutter engine (CanvasKit) and fonts are self-hosted (`--no-web-resources-cdn`, bundled fonts), so the CSP can stay strict.
 - **Untrusted local data is validated:** saved progress is parsed defensively — corrupted or tampered values are clamped or ignored (tested).
-- **Small supply chain:** only 2 runtime packages (`http`, `shared_preferences`, both from the Dart/Flutter teams); the API has **zero** npm dependencies; Dependabot watches updates; the Flutter SDK version is pinned for builds.
+- **Small supply chain:** only 3 runtime packages (`http`, `shared_preferences`, `web` — all from the Dart/Flutter teams); the API has **zero** npm dependencies; Dependabot watches updates; the Flutter SDK version is pinned for builds.
 - Code answers are **never executed** — the game only shows code, so there is no code-execution risk.
 
 See [SECURITY.md](SECURITY.md).
@@ -73,7 +86,7 @@ See [SECURITY.md](SECURITY.md).
 - **Screen readers:** every button, gate, move and block has a clear label; hearts, health and stars are read out ("2 of 3 hearts left"); feedback is announced with live regions. On the web, accessibility is switched on at start-up so screen readers work immediately.
 - **Full keyboard play:** Tab/Enter everywhere; Runner: ←/→ or 1–3 to change lane, Space to dash; Battle: 1–4 to attack.
 - **No timing pressure if you need it:** Runner timer can be Normal, Relaxed (2×) or Off (WCAG 2.2.1).
-- **Reduce motion** setting (and respects the device setting): stops moving gates, shakes and bouncing.
+- **Reduce motion** setting (and respects the device setting): stops the animated scenes, moving gates, shakes and confetti.
 - **High-contrast mode** and **bigger text** (3 sizes, on top of the device text size).
 - Colour is never the only signal — right/wrong always also shows ✓/✗ icons and text.
 - Large touch targets (≥ 48 px), WCAG AA text contrast — **checked automatically** by tests on every screen in both normal and high-contrast themes.
@@ -81,17 +94,20 @@ See [SECURITY.md](SECURITY.md).
 ### 🧪 Testing
 - **Flutter tests** (`flutter test`):
   - [`curriculum_test.dart`](test/curriculum_test.dart) — every level/question/puzzle is well-formed (unique ids, valid answers, no duplicate options…)
-  - [`game_logic_test.dart`](test/game_logic_test.dart) — runner/battle rules, puzzle rules, hints, stars, XP
-  - [`progress_test.dart`](test/progress_test.dart) — unlocking, streaks, saving/loading, tampered-data handling
+  - [`game_logic_test.dart`](test/game_logic_test.dart) — runner/battle rules, combos, 50/50 power-up, puzzle rules, hints, stars, XP
+  - [`progress_test.dart`](test/progress_test.dart) — unlocking, streaks, badges, coin spending, saving/loading, tampered-data handling
+  - [`sound_test.dart`](test/sound_test.dart) — every sound effect is short and quiet, and playing sounds is safe on every platform
   - [`doubt_service_test.dart`](test/doubt_service_test.dart) — input sanitising, topic matching, AI → offline fallback with a mock server
-  - [`widget_test.dart`](test/widget_test.dart) — plays full levels: runner (incl. keyboard + timer), battle, puzzle, Doubt Buddy, settings
-  - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on every screen
+  - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: runner (keyboard, timer, 50/50), battle, puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
+  - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 12 screens, in normal and high-contrast mode
 - **API tests** (`npm test`) — validation, rate limiting, origin check, handler status codes.
 - **End-to-end:** the screenshot workflow plays the real web build in Chrome and fails on errors or CSP violations.
 - **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs analyze + tests + web build + Android APK build on every push.
 
 ### 🧹 Code quality
-- Clear structure: `models/` (data types), `data/` (all lessons as plain data), `logic/` (pure, UI-free game rules), `services/` (doubt solver), `screens/`, `widgets/`, `theme/`.
+- Clear structure: `models/` (data types), `data/` (all lessons as plain data), `logic/` (pure, UI-free game rules and badges), `services/` (doubt solver, sound effects), `screens/`, `widgets/` (game UI kit, painted scenes, effects), `theme/` (design tokens).
+- A small, consistent game UI kit ([`lib/widgets/game_ui.dart`](lib/widgets/game_ui.dart)): 3D `GameButton`, `ParchmentPanel`, `OutlinedText`, HUD pills. Every screen uses the same pieces, so the look stays consistent and accessible.
+- All scenery is drawn in code with `CustomPainter` ([`lib/widgets/scenes.dart`](lib/widgets/scenes.dart)), so there are no image downloads.
 - Game rules are pure Dart classes, so they are easy to test and reuse.
 - Strict analyzer settings (`strict-casts`, `strict-inference`, `strict-raw-types`) + extra lints; `flutter analyze` reports **no issues**.
 - No extra state-management package — a small `InheritedNotifier` keeps things simple.
@@ -128,13 +144,13 @@ To enable the AI tutor, add an environment variable in Vercel → Project → Se
 
 ```
 lib/
-  data/          curriculum.dart (lessons & questions), doubt_kb.dart (offline tutor)
-  logic/         quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart
+  data/          curriculum.dart (lessons & questions), doubt_kb.dart (offline tutor), fun_facts.dart
+  logic/         quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart, achievements.dart
   models/        models.dart
-  screens/       home, world map, lesson, runner, battle, puzzle, results, doubt buddy, settings
+  screens/       title, home hub, world map, lesson, runner, battle, puzzle, results, trophy room, doubt buddy, settings
   services/      doubt_service.dart (offline tutor + secure AI client)
   theme/         app_theme.dart (normal + high contrast)
-  widgets/       shared UI pieces
+  widgets/       game_ui.dart (buttons, panels, HUD), scenes.dart (painted worlds), effects.dart (confetti, shake...)
 api/             ask.js (serverless AI endpoint), _lib/tutor.js (validation, rate limit)
 api-tests/       Node tests for the API
 test/            Flutter unit, widget and accessibility tests
@@ -143,5 +159,5 @@ tool/screenshots capture.mjs (plays the game, takes screenshots + video frames)
 
 ## Credits
 Made by **P Om Shiva** (M.Tech CSE, Pondicherry University).
-Fonts: Poppins (SIL OFL 1.1), DejaVu Sans Mono (Bitstream Vera license) — see `assets/fonts/`.
+Fonts: Lilita One and Poppins (SIL OFL 1.1), DejaVu Sans Mono (Bitstream Vera license) — see `assets/fonts/`.
 Code licensed under the [MIT License](LICENSE).

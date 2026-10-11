@@ -4,9 +4,14 @@ import 'package:codequest/app.dart';
 import 'package:codequest/app_scope.dart';
 import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/progress.dart';
+import 'package:codequest/screens/achievements_screen.dart';
 import 'package:codequest/screens/battle_screen.dart';
+import 'package:codequest/screens/home_screen.dart';
 import 'package:codequest/screens/puzzle_screen.dart';
 import 'package:codequest/screens/runner_screen.dart';
+import 'package:codequest/screens/settings_screen.dart';
+import 'package:codequest/screens/title_screen.dart';
+import 'package:codequest/services/sound.dart';
 import 'package:codequest/services/doubt_service.dart';
 import 'package:codequest/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +26,9 @@ Future<ProgressController> pumpApp(WidgetTester tester, {AppSettings settings = 
   addTearDown(tester.view.reset);
   final progress = ProgressController(storage: MemoryProgressStorage())..updateSettings(settings);
   await tester.pumpWidget(CodeQuestApp(controller: progress, doubtService: DoubtService()));
+  await tester.pumpAndSettle();
+  // Title screen first: press Play.
+  await tester.tap(find.text('Play'));
   await tester.pumpAndSettle();
   return progress;
 }
@@ -38,7 +46,14 @@ Future<ProgressController> pumpScreen(
   await tester.pumpWidget(AppScope(
     controller: progress,
     doubtService: DoubtService(),
-    child: MaterialApp(theme: buildTheme(highContrast: false), home: screen),
+    child: MaterialApp(
+      theme: buildTheme(highContrast: false),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
+      home: screen,
+    ),
   ));
   await tester.pump();
   return progress;
@@ -49,18 +64,39 @@ Finder semantics(String pattern) => find.bySemanticsLabel(RegExp(pattern));
 String esc(String s) => RegExp.escape(s);
 
 void main() {
-  testWidgets('home shows all four worlds and the Doubt Buddy', (tester) async {
-    await pumpApp(tester);
-    expect(find.text('Python Jungle'), findsOneWidget);
-    expect(find.text('C Caves'), findsOneWidget);
-    expect(find.text('C++ Castle'), findsOneWidget);
-    expect(find.text('Java Volcano'), findsOneWidget);
+  testWidgets('title screen leads to the home hub with all four worlds', (tester) async {
+    final handle = tester.ensureSemantics();
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final progress = ProgressController(storage: MemoryProgressStorage())..updateSettings(_calm);
+    await tester.pumpWidget(CodeQuestApp(controller: progress, doubtService: DoubtService()));
+    await tester.pumpAndSettle();
+    expect(find.byType(TitleScreen), findsOneWidget);
+    expect(find.bySemanticsLabel('CodeQuest'), findsOneWidget);
+    await tester.tap(find.text('Play'));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+    for (final world in ['Python Jungle', 'C Caves', 'C++ Castle', 'Java Volcano']) {
+      expect(find.text(world), findsWidgets);
+    }
     expect(find.text('Doubt Buddy'), findsOneWidget);
+    expect(find.text('Did you know?'), findsOneWidget);
+    handle.dispose();
+  });
+
+  testWidgets('trophy room lists every badge', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.byTooltip(RegExp('^Trophy room')));
+    await tester.pumpAndSettle();
+    expect(find.byType(AchievementsScreen), findsOneWidget);
+    expect(find.text('First steps'), findsOneWidget);
+    expect(find.textContaining('No badges yet'), findsOneWidget);
   });
 
   testWidgets('world -> lesson -> runner navigation', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.text('Python Jungle'));
+    await tester.tap(find.text('Python Jungle').first);
     await tester.pumpAndSettle();
     expect(find.text('Hello, Python!'), findsOneWidget);
 
@@ -93,8 +129,10 @@ void main() {
       await tester.tap(find.text(i == level.questions.length - 1 ? 'See results' : 'Next gate'));
       await tester.pumpAndSettle();
     }
-    expect(find.text('Level complete!'), findsOneWidget);
+    expect(find.text('Level clear!'), findsWidgets);
+    expect(find.text('Badge unlocked: First steps'), findsOneWidget);
     expect(progress.starsFor('py-1'), 3);
+    expect(progress.bestCombo, level.questions.length);
     expect(progress.isUnlocked(levelById('py-2')!), isTrue);
     handle.dispose();
   });
@@ -149,8 +187,8 @@ void main() {
       await tester.tap(find.text(q == first ? 'See results' : 'Next move'));
       await tester.pumpAndSettle();
     }
-    expect(find.text('Level complete!'), findsOneWidget);
-    expect(find.text('Learn from your mistakes'), findsOneWidget);
+    expect(find.text('Level clear!'), findsWidgets);
+    expect(find.text('Learn from your mistakes'), findsWidgets);
     expect(progress.starsFor('py-2'), 2);
     handle.dispose();
   });
@@ -168,14 +206,56 @@ void main() {
         await tester.tap(block);
         await tester.pump();
       }
-      await tester.ensureVisible(find.text('Check'));
-      await tester.tap(find.text('Check'));
+      await tester.ensureVisible(find.text('Run code'));
+      await tester.tap(find.text('Run code'));
       await tester.pump();
       expect(find.text('Program works!'), findsOneWidget);
+      // The console shows what the program prints.
+      expect(find.text(level.puzzles[p].output), findsOneWidget);
       await tester.tap(find.text(p == level.puzzles.length - 1 ? 'See results' : 'Next puzzle'));
       await tester.pumpAndSettle();
     }
-    expect(find.text('Level complete!'), findsOneWidget);
+    expect(find.text('Level clear!'), findsWidgets);
+    handle.dispose();
+  });
+
+  testWidgets('puzzle: a wrong order shows a bug and costs a heart', (tester) async {
+    final handle = tester.ensureSemantics();
+    final level = levelById('c-3')!;
+    await pumpScreen(tester, PuzzleScreen(level: level, random: Random(6)));
+    final lines = level.puzzles.first.lines.length;
+    for (var i = lines - 1; i >= 0; i--) {
+      final block = find.byKey(ValueKey('block-$i'));
+      await tester.ensureVisible(block);
+      await tester.tap(block);
+      await tester.pump();
+    }
+    await tester.ensureVisible(find.text('Run code'));
+    await tester.tap(find.text('Run code'));
+    await tester.pump();
+    expect(find.textContaining('Bug found'), findsOneWidget);
+    expect(find.bySemanticsLabel('2 of 3 hearts left'), findsOneWidget);
+    handle.dispose();
+  });
+
+  testWidgets('runner: 50/50 spends coins and removes a wrong gate', (tester) async {
+    final handle = tester.ensureSemantics();
+    final level = levelById('cpp-1')!;
+    final progress = await pumpScreen(tester, RunnerScreen(level: level, random: Random(7)));
+
+    // No coins yet: the power-up explains how to earn them.
+    await tester.tap(semantics('^Use 50/50'));
+    await tester.pump();
+    expect(find.textContaining('You need 15 coins'), findsOneWidget);
+
+    progress.recordResult(levelById('py-1')!, stars: 3, correct: 5);
+    final before = progress.coins;
+    await tester.pump();
+    await tester.tap(semantics('^Use 50/50'));
+    await tester.pump();
+    expect(progress.coins, before - 15);
+    expect(semantics('removed by 50/50'), findsOneWidget);
+    expect(semantics('^50/50 already used'), findsOneWidget);
     handle.dispose();
   });
 
@@ -197,8 +277,21 @@ void main() {
     await tester.tap(find.text('High contrast'));
     await tester.pumpAndSettle();
     expect(progress.settings.highContrast, isTrue);
-    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).last);
-    expect(scaffold.backgroundColor ?? Theme.of(tester.element(find.byType(Scaffold).last)).scaffoldBackgroundColor,
-        GameColors.highContrast.background);
+    final colors = GameColors.of(tester.element(find.byType(SettingsScreen)));
+    expect(colors.highContrast, isTrue);
+    expect(colors.parchment, GameColors.highContrastColors.parchment);
+  });
+
+  testWidgets('settings can switch sound effects off', (tester) async {
+    final progress = await pumpApp(tester);
+    expect(SoundFx.enabled, isTrue);
+    await tester.tap(find.byTooltip('Settings and accessibility'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Sound effects'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sound effects'));
+    await tester.pumpAndSettle();
+    expect(progress.settings.soundOn, isFalse);
+    expect(SoundFx.enabled, isFalse);
   });
 }

@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   http: ^1.2.2
   shared_preferences: ^2.3.2
+  # Dart team package; used only on the web to play the 8-bit sound effects.
+  web: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -31,3 +33,6 @@ flutter:
     - family: CodeMono
       fonts:
         - asset: assets/fonts/DejaVuSansMono.ttf
+    - family: Lilita
+      fonts:
+        - asset: assets/fonts/LilitaOne-Regular.ttf
