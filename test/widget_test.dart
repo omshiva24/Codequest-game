@@ -65,6 +65,9 @@ String esc(String s) => RegExp.escape(s);
 void main() {
   testWidgets('title screen leads to the home hub with all four worlds', (tester) async {
     final handle = tester.ensureSemantics();
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final progress = ProgressController(storage: MemoryProgressStorage())..updateSettings(_calm);
     await tester.pumpWidget(CodeQuestApp(controller: progress, doubtService: DoubtService()));
     await tester.pumpAndSettle();
