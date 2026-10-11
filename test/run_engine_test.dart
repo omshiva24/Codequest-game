@@ -165,9 +165,10 @@ void main() {
         RunItem(RunItemKind.block, 35, lane: 1),
       ]);
       final lives = e.session.lives;
-      final first = _runTo(e, 25).whereType<ObstacleHit>().single;
+      // Check right after the crash: the monster then slowly falls back.
+      final first = _runTo(e, 20.5).whereType<ObstacleHit>().single;
       expect(first.lostHeart, isFalse);
-      expect(e.chase, greaterThan(0.9));
+      expect(e.chase, greaterThan(0.95));
       expect(e.session.lives, lives);
       final second = _runTo(e, 40).whereType<ObstacleHit>().single;
       expect(second.lostHeart, isTrue);
