@@ -441,7 +441,8 @@ class _RunnerScreenState extends State<RunnerScreen> with TickerProviderStateMix
               animation: Listenable.merge([_approach, _scroll, _flash]),
               builder: (context, _) {
                 final p = last != null ? 1.0 : (staticGates ? 0.95 : _approach.value);
-                final gateS = 0.06 + 0.62 * p * p;
+                // Gates start mid-distance (still readable) and speed up as they near.
+                final gateS = 0.25 + 0.47 * pow(p, 1.2);
                 final scale = track.scale(gateS);
                 final laneW = track.width(gateS) / track.lanes;
                 final gateW = laneW * 0.92;
