@@ -330,6 +330,20 @@ try {
 } catch (err) {
   console.error('Capture failed:', err.message);
   await page.screenshot({ path: join(OUT, 'zz-error.png') }).catch(() => {});
+  // Print what a screen reader would see, to make failures easy to debug.
+  const labels = await page
+    .evaluate(() =>
+      [...document.querySelectorAll('[aria-label], flt-semantics')]
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          const label = (el.getAttribute('aria-label') || '').trim();
+          return label ? `${label.slice(0, 70)} @${Math.round(r.x)},${Math.round(r.y)} ${Math.round(r.width)}x${Math.round(r.height)}` : '';
+        })
+        .filter(Boolean)
+        .slice(0, 60),
+    )
+    .catch(() => []);
+  console.error('On screen:\n  ' + labels.join('\n  '));
   process.exitCode = 1;
 } finally {
   recording = false;
