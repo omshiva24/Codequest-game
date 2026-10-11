@@ -57,6 +57,37 @@ void main() {
       expect(s.firstTryCorrect, 2, reason: '"a" was not right first time');
     });
 
+    test('combo counts right answers in a row and resets on a miss', () {
+      final s = QuizSession(_questions, random: Random(8), requeueWrong: true);
+      s.answer(s.current!.correctIndex);
+      s.answer(s.current!.correctIndex);
+      expect(s.combo, 2);
+      s.answer(_wrongIndex(s.current!));
+      expect(s.combo, 0);
+      s.answer(s.current!.correctIndex);
+      expect(s.combo, 1);
+      expect(s.bestCombo, 2);
+    });
+
+    test('50/50 removes only wrong options', () {
+      const four = Question(id: 'f', prompt: '?', options: ['a', 'b', 'c', 'd'], answer: 2, explanation: 'e');
+      for (var seed = 0; seed < 10; seed++) {
+        final s = QuizSession(const [four], random: Random(seed));
+        final removed = s.useFiftyFifty();
+        expect(removed, hasLength(2));
+        expect(removed, isNot(contains(s.current!.correctIndex)));
+        expect(s.visibleOptions, 2);
+        expect(s.canUseFiftyFifty, isFalse);
+        expect(s.useFiftyFifty(), isEmpty);
+        expect(s.powerUpsUsed, 1);
+      }
+      final three = QuizSession(_questions, random: Random(9));
+      expect(three.useFiftyFifty(), hasLength(1));
+      three.answer(three.current!.correctIndex);
+      expect(three.isHidden(0) || three.isHidden(1) || three.isHidden(2), isFalse,
+          reason: 'hidden options reset for the next question');
+    });
+
     test('rejects out-of-range choices', () {
       final s = QuizSession(_questions);
       expect(() => s.answer(-1), throwsRangeError);
@@ -70,6 +101,7 @@ void main() {
       goal: 'g',
       lines: ['one', 'two', 'three', 'four'],
       explanation: 'x',
+      output: 'done',
     );
 
     test('starts shuffled into a different order', () {
