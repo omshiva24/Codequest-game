@@ -100,7 +100,7 @@ See [SECURITY.md](SECURITY.md).
   - [`progress_test.dart`](test/progress_test.dart) — unlocking, streaks, badges, coin spending, saving/loading, tampered-data handling
   - [`sound_test.dart`](test/sound_test.dart) — every sound effect is short and quiet, and playing sounds is safe on every platform
   - [`doubt_service_test.dart`](test/doubt_service_test.dart) — input sanitising, topic matching, AI → offline fallback with a mock server
-  - [`run_engine_test.dart`](test/run_engine_test.dart) — the action runner's rules: track generation always leaves a way through, jumping, sliding, crashes, the chasing monster, shields, hint orbs, gates; a bot finishes 40 random tracks
+  - [`run_engine_test.dart`](test/run_engine_test.dart) — the action runner's rules: track generation always leaves a way through, jumping, sliding, crashes, the chasing monster, shields, hint orbs, gates; a bot finishes 150 random tracks without a single crash
   - [`temple_run_test.dart`](test/temple_run_test.dart) — plays the action runner through the real screen frame by frame, the "Watch Byte play" demo (saves nothing), keyboard controls and pause
   - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: runner (keyboard, timer, 50/50), battle, puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
   - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 12 screens, in normal and high-contrast mode
