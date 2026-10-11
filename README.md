@@ -51,10 +51,10 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | Title screen | Home | World map |
 |---|---|---|
 | ![Title](docs/screenshots/00-title.png) | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) |
-| **Lesson with Byte** | **Code Runner: run!** | **Code gate passed** |
-| ![Lesson](docs/screenshots/03-lesson.png) | ![Runner](docs/screenshots/04-runner.png) | ![Runner feedback](docs/screenshots/05-runner-correct.png) |
-| **Dodging obstacles** | | |
-| ![Runner action](docs/screenshots/05b-runner-action.png) | | |
+| **Lesson with Byte** | **Code Runner: run and grab coins** | **Code gate ahead: pick your lane** |
+| ![Lesson](docs/screenshots/03-lesson.png) | ![Runner](docs/screenshots/04-runner.png) | ![Gate ahead](docs/screenshots/05-runner-correct.png) |
+| **Through the right gate!** | **Jump, slide, dodge** | |
+| ![Right gate](docs/screenshots/05b-runner-action.png) | ![Obstacles](docs/screenshots/05c-runner-obstacles.png) | |
 | **Level clear** | **Bug Battle** | **Code bolt attack** |
 | ![Results](docs/screenshots/06-results.png) | ![Battle](docs/screenshots/07-battle.png) | ![Attack](docs/screenshots/08-battle-attack.png) |
 | **Learning from a miss** | **Block Builder** | **Run code: console output** |
