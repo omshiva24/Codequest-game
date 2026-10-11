@@ -8,14 +8,20 @@ import 'dart:math';
 import 'package:codequest/app.dart';
 import 'package:codequest/app_scope.dart';
 import 'package:codequest/data/curriculum.dart';
+import 'package:codequest/logic/achievements.dart';
 import 'package:codequest/logic/progress.dart';
 import 'package:codequest/models/models.dart';
+import 'package:codequest/screens/achievements_screen.dart';
 import 'package:codequest/screens/battle_screen.dart';
 import 'package:codequest/screens/doubt_buddy_screen.dart';
+import 'package:codequest/screens/home_screen.dart';
 import 'package:codequest/screens/lesson_screen.dart';
+import 'package:codequest/screens/navigation.dart';
 import 'package:codequest/screens/puzzle_screen.dart';
+import 'package:codequest/screens/result_screen.dart';
 import 'package:codequest/screens/runner_screen.dart';
 import 'package:codequest/screens/settings_screen.dart';
+import 'package:codequest/screens/title_screen.dart';
 import 'package:codequest/screens/world_screen.dart';
 import 'package:codequest/services/doubt_service.dart';
 import 'package:codequest/theme/app_theme.dart';
@@ -47,6 +53,31 @@ Future<void> _expectAccessible(WidgetTester tester) async {
 
 void main() {
   final screens = <String, Widget Function()>{
+    'title': () => const TitleScreen(),
+    'home': () => const HomeScreen(),
+    'trophy room': () => const AchievementsScreen(),
+    'results': () => ResultScreen(
+          outcome: GameOutcome(
+            level: levelById('py-2')!,
+            won: true,
+            correct: 4,
+            total: 5,
+            stars: 2,
+            bestCombo: 3,
+            review: const [
+              ReviewItem(prompt: 'What does this print?', code: 'print(2 + 3)', correctAnswer: '5', explanation: 'Maths first.'),
+            ],
+          ),
+          reward: LevelReward(
+            stars: 2,
+            xp: 60,
+            coins: 30,
+            newBest: true,
+            leveledUp: false,
+            unlockedNext: levelById('py-3'),
+            newAchievements: [achievementById('first_steps')!],
+          ),
+        ),
     'world map': () => const WorldScreen(lang: Lang.python),
     'lesson': () => LessonScreen(level: levelById('c-2')!),
     'runner': () => RunnerScreen(level: levelById('py-1')!, random: Random(1)),
@@ -56,7 +87,7 @@ void main() {
     'settings': () => const SettingsScreen(),
   };
 
-  testWidgets('home screen meets accessibility guidelines', (tester) async {
+  testWidgets('app start (title screen) meets accessibility guidelines', (tester) async {
     final handle = tester.ensureSemantics();
     tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1;
