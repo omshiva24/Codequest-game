@@ -2,10 +2,9 @@ import 'dart:math';
 
 import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/quiz_session.dart';
+import 'package:codequest/logic/run_autopilot.dart';
 import 'package:codequest/logic/run_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'run_autopilot.dart';
 
 const _step = 1 / 60;
 

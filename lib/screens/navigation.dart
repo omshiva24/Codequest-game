@@ -9,6 +9,7 @@ import 'lesson_screen.dart';
 import 'puzzle_screen.dart';
 import 'result_screen.dart';
 import 'runner_screen.dart';
+import 'temple_run.dart';
 
 /// Something the player got wrong, shown on the results screen.
 class ReviewItem {
@@ -99,6 +100,18 @@ void finishLevel(BuildContext context, GameOutcome outcome) {
     gameRoute<void>(ResultScreen(outcome: outcome, reward: reward)),
   );
 }
+
+/// "Watch Byte play": a demo run of a Code Runner level (nothing is saved).
+void watchDemoRun(BuildContext context, Level level) {
+  Navigator.of(context).pushReplacement(gameRoute<void>(TempleRun(level: level, demo: true)));
+}
+
+/// Whether the action runner is used. Reduce motion, the "No timer" setting
+/// and screen readers get the calm, step-by-step runner instead.
+bool usesActionRunner(BuildContext context) =>
+    !reduceMotionOf(context, listen: false) &&
+    AppScope.read(context).settings.timerMode != TimerMode.off &&
+    !MediaQuery.accessibleNavigationOf(context);
 
 void openDoubtBuddy(
   BuildContext context, {

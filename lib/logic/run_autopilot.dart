@@ -1,9 +1,11 @@
-import 'package:codequest/logic/run_engine.dart';
+import 'run_engine.dart';
 
-/// A tiny bot that plays the code runner perfectly: it dodges blocks,
-/// jumps hurdles, slides under beams and picks the right gate.
+/// Byte's autopilot: plays the code runner perfectly. It dodges blocks,
+/// jumps hurdles, slides under beams and runs through the right gate.
 ///
-/// Used to prove every generated track can be finished without crashing.
+/// Used for the "Watch Byte play" demo run, and by tests to prove every
+/// generated track can be finished without crashing. Call it once per frame,
+/// before [RunEngine.update].
 void autopilot(RunEngine e) {
   final q = e.session.current;
   final toGate = e.distanceToGate;

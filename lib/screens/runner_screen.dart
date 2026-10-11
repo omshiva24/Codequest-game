@@ -42,9 +42,7 @@ class _RunnerScreenState extends State<RunnerScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Decide once, so the mode never flips in the middle of a level.
-    _calm ??= reduceMotionOf(context, listen: false) ||
-        AppScope.read(context).settings.timerMode == TimerMode.off ||
-        MediaQuery.accessibleNavigationOf(context);
+    _calm ??= !usesActionRunner(context);
   }
 
   @override

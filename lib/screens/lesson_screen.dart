@@ -150,6 +150,17 @@ class LessonScreen extends StatelessWidget {
               icon: Icons.play_arrow_rounded,
               label: 'Start ${level.kind.label}',
             ),
+            if (level.kind == LevelKind.runner && usesActionRunner(context)) ...[
+              const SizedBox(height: 6),
+              GameButton(
+                tone: ButtonTone.mint,
+                expand: true,
+                onPressed: () => watchDemoRun(context, level),
+                icon: Icons.smart_toy_rounded,
+                label: 'Watch Byte play',
+                semanticLabel: 'Watch Byte play a demo run first. Nothing is saved.',
+              ),
+            ],
             const SizedBox(height: 6),
             GameButton(
               tone: ButtonTone.sky,
