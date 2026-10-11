@@ -249,11 +249,15 @@ try {
   // Code Runner (action game): film Byte's demo run - real running, jumping,
   // sliding, coins and code gates.
   await tapScrolling('Watch Byte play');
-  await sleep(4500); // page change + 3-2-1 countdown
+  await sleep(5500); // page change + 3-2-1 countdown
   await shot('04-runner');
-  await sleep(5200);
-  await shot('05-runner-correct'); // just after the first code gate
-  await sleep(11000);
+  // The first code gate is close: Byte switches to the right lane.
+  await locate('Choose now!', { timeout: 40000 });
+  await sleep(700);
+  await shot('05-runner-correct');
+  // Through the gate: the explanation pops up.
+  await locate('+5 coins', { timeout: 20000 });
+  await sleep(300);
   await shot('05b-runner-action');
   // The demo ends back on the lesson.
   await locate('Watch Byte play', { timeout: 150000 });
