@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../app_scope.dart';
 import '../logic/progress.dart';
 import '../logic/quiz_session.dart';
+import '../logic/run_autopilot.dart';
 import '../logic/run_engine.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
@@ -37,10 +38,14 @@ class _Frame extends ChangeNotifier {
 
 /// The Temple-Run style code runner (see [RunEngine] for the rules).
 class TempleRun extends StatefulWidget {
-  const TempleRun({super.key, required this.level, this.random, this.onEngineReady});
+  const TempleRun({super.key, required this.level, this.random, this.demo = false, this.onEngineReady});
 
   final Level level;
   final Random? random;
+
+  /// "Watch Byte play": the autopilot runs the level so new players can see
+  /// how jumping, sliding and code gates work. Nothing is saved.
+  final bool demo;
 
   /// Lets tests drive the engine directly (an autopilot).
   @visibleForTesting
@@ -132,6 +137,7 @@ class _TempleRunState extends State<TempleRun> with SingleTickerProviderStateMix
           setState(() {});
         }
       case _Phase.running:
+        if (widget.demo) _demoStep();
         final lane = _engine.lane;
         final events = _engine.update(dt);
         if (events.isNotEmpty) _handle(events);
@@ -246,7 +252,16 @@ class _TempleRunState extends State<TempleRun> with SingleTickerProviderStateMix
 
   // ----------------------------------------------------------------- input
 
-  bool get _canSteer => _phase == _Phase.running;
+  bool get _canSteer => _phase == _Phase.running && !widget.demo;
+
+  /// Lets Byte steer (demo run), with the same sounds a player would hear.
+  void _demoStep() {
+    final wasJumping = _engine.jumping;
+    final wasSliding = _engine.sliding;
+    autopilot(_engine);
+    if (!wasJumping && _engine.jumping) SoundFx.play(Sfx.jump);
+    if (!wasSliding && _engine.sliding) SoundFx.play(Sfx.slide);
+  }
 
   void _steer(bool Function() action) {
     if (!_canSteer) return;
@@ -377,6 +392,15 @@ class _TempleRunState extends State<TempleRun> with SingleTickerProviderStateMix
   void _finish() {
     if (_done || !mounted) return;
     _done = true;
+    if (widget.demo) {
+      // A demo run saves nothing; it ends back on the lesson.
+      final messenger = ScaffoldMessenger.of(context);
+      openLesson(context, widget.level, replace: true);
+      messenger.showSnackBar(
+        const SnackBar(content: Text("That was Byte's demo run. Now it's your turn!")),
+      );
+      return;
+    }
     final s = _session;
     finishLevel(
       context,
@@ -529,6 +553,15 @@ class _TempleRunState extends State<TempleRun> with SingleTickerProviderStateMix
   Widget _statusRow(GameColors g) {
     return Row(
       children: [
+        if (widget.demo) ...[
+          HudPill(
+            leading: const Emoji('🦉', size: 18),
+            text: 'Demo',
+            semanticLabel: 'Demo run: Byte is playing. Nothing is saved.',
+            highlight: g.sky,
+          ),
+          const SizedBox(width: 8),
+        ],
         Expanded(child: _RunProgress(engine: _engine, color: widget.level.lang.color)),
         if (_session.combo >= 2) ...[
           const SizedBox(width: 8),
