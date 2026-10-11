@@ -259,6 +259,10 @@ try {
   await locate('+5 coins', { timeout: 20000 });
   await sleep(300);
   await shot('05b-runner-action');
+  // Between gates 2 and 3 come obstacles and a power-up: jump, slide, dodge.
+  await locate('Code gate 3 of 5', { timeout: 60000 });
+  await sleep(2600);
+  await shot('05c-runner-obstacles');
   // The demo ends back on the lesson, with a "your turn" banner at the top.
   await locate("Byte's demo run", { timeout: 180000 });
   await sleep(800);
