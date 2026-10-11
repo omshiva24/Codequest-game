@@ -124,8 +124,26 @@ async function locate(text, { timeout = 15000, exact = false } = {}) {
   throw new Error(`Could not find "${text}" on screen`);
 }
 
+/**
+ * Like locate(), but waits until the element has stopped moving (panels slide
+ * and pop in) and its centre is inside the window, so the click lands on it.
+ */
+async function locateStable(text, opts = {}) {
+  const end = Date.now() + (opts.timeout ?? 15000);
+  let last = null;
+  while (Date.now() < end) {
+    const p = await locate(text, { ...opts, timeout: Math.max(300, end - Date.now()) });
+    const viewportHeight = await page.evaluate(() => innerHeight);
+    const inView = p.y > 2 && p.y < viewportHeight - 2;
+    if (inView && last && Math.abs(last.x - p.x) < 1 && Math.abs(last.y - p.y) < 1) return p;
+    last = inView ? p : null;
+    await sleep(200);
+  }
+  throw new Error(`"${text}" never settled on screen`);
+}
+
 async function tap(text, opts) {
-  const p = await locate(text, opts);
+  const p = await locateStable(text, opts);
   await page.mouse.click(p.x, p.y);
   await sleep(700);
 }
@@ -145,7 +163,7 @@ async function scroll(dy) {
 /** Scrolls down until `text` is on screen, then taps it. */
 async function tapScrolling(text, opts = {}) {
   for (let i = 0; i < 10; i++) {
-    const hit = await locate(text, { ...opts, timeout: 600 }).catch(() => null);
+    const hit = await locateStable(text, { ...opts, timeout: 1200 }).catch(() => null);
     if (hit) {
       await page.mouse.click(hit.x, hit.y);
       await sleep(700);
