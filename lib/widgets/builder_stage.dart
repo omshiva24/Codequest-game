@@ -531,7 +531,7 @@ class StagePainter extends CustomPainter {
   final Color ink;
   final bool highContrast;
 
-  late final _Look look = _lookFor(scene.lang, highContrast);
+  late final _Look _look = _lookFor(scene.lang, highContrast);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -574,12 +574,12 @@ class StagePainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [look.skyTop, look.skyBottom],
+          colors: [_look.skyTop, _look.skyBottom],
         ).createShader(rect),
     );
     if (highContrast) return;
     final t = geo.tile;
-    final far = Paint()..color = look.far;
+    final far = Paint()..color = _look.far;
     switch (scene.lang) {
       case Lang.python:
         canvas.drawCircle(Offset(geo.x(11.5), t * 1.2), t * 0.8, Paint()..color = const Color(0xFFFFF1A8));
@@ -596,7 +596,7 @@ class StagePainter extends CustomPainter {
             ..close();
           canvas.drawPath(path, far);
         }
-        final glow = Paint()..color = look.hazardLight.withValues(alpha: 0.5);
+        final glow = Paint()..color = _look.hazardLight.withValues(alpha: 0.5);
         for (final cx in const [2.0, 7.5, 12.0]) {
           canvas.drawCircle(Offset(geo.x(cx), t * (1.8 + cx % 2)), t * 0.07, glow);
         }
@@ -632,10 +632,10 @@ class StagePainter extends CustomPainter {
   void _groundRect(Canvas canvas, StageGeometry geo, double fromCol, double toCol, {bool leftEdge = false, bool rightEdge = false}) {
     final t = geo.tile;
     final rect = Rect.fromLTRB(geo.x(fromCol), geo.ground, geo.x(toCol), geo.height + 4);
-    canvas.drawRect(rect, Paint()..color = look.ground);
-    canvas.drawRect(Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + t * 0.32), Paint()..color = look.groundTop);
+    canvas.drawRect(rect, Paint()..color = _look.ground);
+    canvas.drawRect(Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + t * 0.32), Paint()..color = _look.groundTop);
     final seam = Paint()
-      ..color = look.groundDark.withValues(alpha: highContrast ? 1 : 0.35)
+      ..color = _look.groundDark.withValues(alpha: highContrast ? 1 : 0.35)
       ..strokeWidth = 1.5;
     for (var c = fromCol.ceil(); c < toCol; c++) {
       canvas.drawLine(Offset(geo.x(c), rect.top + t * 0.45), Offset(geo.x(c), geo.height), seam);
@@ -649,10 +649,10 @@ class StagePainter extends CustomPainter {
   void _block(Canvas canvas, Rect r) {
     final t = r.width;
     final rr = RRect.fromRectAndRadius(r.deflate(1), Radius.circular(t * 0.12));
-    canvas.drawRRect(rr, Paint()..color = look.block);
-    canvas.drawRect(Rect.fromLTWH(r.left + t * 0.1, r.top + t * 0.1, r.width - t * 0.2, t * 0.14), Paint()..color = look.blockLight);
+    canvas.drawRRect(rr, Paint()..color = _look.block);
+    canvas.drawRect(Rect.fromLTWH(r.left + t * 0.1, r.top + t * 0.1, r.width - t * 0.2, t * 0.14), Paint()..color = _look.blockLight);
     final grain = Paint()
-      ..color = look.blockDark
+      ..color = _look.blockDark
       ..strokeWidth = 1.6;
     switch (scene.lang) {
       case Lang.python: // wooden planks
@@ -681,9 +681,9 @@ class StagePainter extends CustomPainter {
     final right = geo.x(5 + gap);
     // Hazard below.
     final surface = geo.ground + t * 0.55;
-    canvas.drawRect(Rect.fromLTRB(left, surface, right, size.height), Paint()..color = look.hazard);
+    canvas.drawRect(Rect.fromLTRB(left, surface, right, size.height), Paint()..color = _look.hazard);
     final light = Paint()
-      ..color = look.hazardLight
+      ..color = _look.hazardLight
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
     if (scene.lang == Lang.c && !highContrast) {
@@ -695,7 +695,7 @@ class StagePainter extends CustomPainter {
           ..lineTo(x + t * 0.25, size.height - t * 0.6)
           ..lineTo(x + t * 0.5, size.height)
           ..close();
-        canvas.drawPath(spike, Paint()..color = look.hazardLight.withValues(alpha: 0.8));
+        canvas.drawPath(spike, Paint()..color = _look.hazardLight.withValues(alpha: 0.8));
       }
     } else {
       final shift = (scene.clock * t * 0.64) % (t * 0.8);
@@ -725,7 +725,7 @@ class StagePainter extends CustomPainter {
     // Splash when Byte falls in.
     if (hero.splash > 0) {
       final p = Paint()
-        ..color = look.hazardLight.withValues(alpha: 1 - hero.splash)
+        ..color = _look.hazardLight.withValues(alpha: 1 - hero.splash)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3;
       final c = Offset(hero.x, surface);
@@ -736,10 +736,10 @@ class StagePainter extends CustomPainter {
   void _ledge(Canvas canvas, StageGeometry geo, double fromCol, int height) {
     final t = geo.tile;
     final rect = Rect.fromLTRB(geo.x(fromCol), geo.above(height), geo.width + 4, geo.ground);
-    canvas.drawRect(rect, Paint()..color = look.ground);
-    canvas.drawRect(Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + t * 0.32), Paint()..color = look.groundTop);
+    canvas.drawRect(rect, Paint()..color = _look.ground);
+    canvas.drawRect(Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + t * 0.32), Paint()..color = _look.groundTop);
     final seam = Paint()
-      ..color = look.groundDark.withValues(alpha: highContrast ? 1 : 0.35)
+      ..color = _look.groundDark.withValues(alpha: highContrast ? 1 : 0.35)
       ..strokeWidth = 1.5;
     for (var r = 1; r < height; r++) {
       canvas.drawLine(Offset(rect.left + 2, geo.above(r)), Offset(rect.right, geo.above(r)), seam);
@@ -753,7 +753,7 @@ class StagePainter extends CustomPainter {
     final t = geo.tile;
     final bottom = geo.above(scene.size + 1.6);
     final rect = Rect.fromLTRB(geo.x(3.2), -4, geo.width + 4, bottom);
-    canvas.drawRect(rect, Paint()..color = look.groundDark);
+    canvas.drawRect(rect, Paint()..color = _look.groundDark);
     final spikes = Path();
     for (var x = rect.left + t * 0.1; x < rect.right; x += t * 0.5) {
       spikes
@@ -792,7 +792,7 @@ class StagePainter extends CustomPainter {
     final height = t * 2.6;
     final top = geo.ground - height;
     // Stone arch around the gate.
-    final arch = Paint()..color = highContrast ? Colors.black : look.groundDark;
+    final arch = Paint()..color = highContrast ? Colors.black : _look.groundDark;
     canvas.drawRect(Rect.fromLTWH(x - t * 0.35, top - t * 0.45, t * 1.1, t * 0.45), arch);
     canvas.drawRect(Rect.fromLTWH(x - t * 0.35, top - t * 0.45, t * 1.1, t * 0.45), _inkStroke);
     // Portcullis bars, lifting up when the gate opens.
