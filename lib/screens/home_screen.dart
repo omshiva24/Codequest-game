@@ -149,6 +149,7 @@ class _PlayerHud extends StatelessWidget {
     );
 
     final pills = Wrap(
+      alignment: WrapAlignment.end,
       spacing: 8,
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -202,7 +203,13 @@ class _PlayerHud extends StatelessWidget {
           );
         }
         return Row(
-          children: [identity, const Spacer(), pills, const SizedBox(width: 16), buttons],
+          children: [
+            identity,
+            const SizedBox(width: 16),
+            Expanded(child: Align(alignment: Alignment.centerRight, child: pills)),
+            const SizedBox(width: 16),
+            buttons,
+          ],
         );
       },
     );

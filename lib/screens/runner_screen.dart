@@ -8,6 +8,7 @@ import '../logic/progress.dart';
 import '../logic/quiz_session.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
+import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/effects.dart';
@@ -130,11 +131,11 @@ class _RunnerScreenState extends State<RunnerScreen> with TickerProviderStateMix
       if (result.correct) {
         _popupTick++;
         _popupText = _session.combo >= 2 ? 'Combo x${_session.combo}!' : '+10 XP';
-        HapticFeedback.lightImpact();
+        SoundFx.play(Sfx.coin);
       } else {
         _shakeTick++;
         if (!_reduceMotion) _flash.forward(from: 0);
-        HapticFeedback.heavyImpact();
+        SoundFx.play(Sfx.wrong);
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -156,6 +157,7 @@ class _RunnerScreenState extends State<RunnerScreen> with TickerProviderStateMix
         ));
       return;
     }
+    SoundFx.play(Sfx.powerUp);
     setState(() {
       _session.useFiftyFifty();
       if (_session.isHidden(_lane)) _setLane(_lane + 1, direction: _lane == 0 ? 1 : -1);

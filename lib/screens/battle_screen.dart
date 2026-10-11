@@ -7,6 +7,7 @@ import '../app_scope.dart';
 import '../logic/quiz_session.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
+import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/effects.dart';
@@ -85,13 +86,13 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
             ? 'Critical hit! ${_enemy.name} is defeated!'
             : "It's super effective! ${_enemy.name} took a hit.$combo";
         if (_session.won) _victoryTick++;
-        HapticFeedback.lightImpact();
+        SoundFx.play(Sfx.hit);
       } else {
         _log = _session.lives <= 0
             ? '${_enemy.name} knocked you out!'
             : '${_enemy.name} attacks! You lost a heart. This question will come back.';
         _shakeTick++;
-        HapticFeedback.heavyImpact();
+        SoundFx.play(Sfx.wrong);
       }
     });
     if (_reduceMotion) {
@@ -119,6 +120,7 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
         ));
       return;
     }
+    SoundFx.play(Sfx.powerUp);
     setState(() {
       _session.useFiftyFifty();
       _log = 'You used 50/50! Two wrong moves are gone.';
