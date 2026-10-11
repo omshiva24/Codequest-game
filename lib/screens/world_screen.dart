@@ -218,8 +218,9 @@ class _LevelNode extends StatelessWidget {
                 Text(level.title,
                     textAlign: TextAlign.center,
                     style: displayStyle(18, color: g.ink, height: 1.15)),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Icon(level.kind.icon, size: 16, color: g.parchmentDim),
                     const SizedBox(width: 4),

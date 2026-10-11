@@ -45,7 +45,14 @@ Future<ProgressController> pumpScreen(
   await tester.pumpWidget(AppScope(
     controller: progress,
     doubtService: DoubtService(),
-    child: MaterialApp(theme: buildTheme(highContrast: false), home: screen),
+    child: MaterialApp(
+      theme: buildTheme(highContrast: false),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
+      home: screen,
+    ),
   ));
   await tester.pump();
   return progress;
