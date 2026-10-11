@@ -13,13 +13,13 @@ import 'package:codequest/logic/progress.dart';
 import 'package:codequest/models/models.dart';
 import 'package:codequest/screens/achievements_screen.dart';
 import 'package:codequest/screens/battle_screen.dart';
+import 'package:codequest/screens/builder_screen.dart';
 import 'package:codequest/screens/doubt_buddy_screen.dart';
 import 'package:codequest/screens/home_screen.dart';
 import 'package:codequest/screens/lesson_screen.dart';
 import 'package:codequest/screens/navigation.dart';
 import 'package:codequest/screens/puzzle_screen.dart';
 import 'package:codequest/screens/result_screen.dart';
-import 'package:codequest/screens/runner_screen.dart';
 import 'package:codequest/screens/settings_screen.dart';
 import 'package:codequest/screens/title_screen.dart';
 import 'package:codequest/screens/world_screen.dart';
@@ -87,7 +87,8 @@ void main() {
         ),
     'world map': () => const WorldScreen(lang: Lang.python),
     'lesson': () => LessonScreen(level: levelById('c-2')!),
-    'runner': () => RunnerScreen(level: levelById('py-1')!, random: Random(1)),
+    'world builder': () => BuilderScreen(level: levelById('py-1')!),
+    'world builder (loops)': () => BuilderScreen(level: levelById('cpp-4')!),
     'battle': () => BattleScreen(level: levelById('java-2')!, random: Random(1)),
     'puzzle': () => PuzzleScreen(level: levelById('cpp-3')!, random: Random(1)),
     'doubt buddy': () => const DoubtBuddyScreen(),

@@ -27,12 +27,13 @@ enum Lang {
 
 /// The three mini-game styles.
 enum LevelKind {
-  runner(
-    'Code Runner',
-    Icons.directions_run_rounded,
-    'Answers are gates on the track. Move to the right lane and dash through it '
-        'before the gates reach you. Use the arrow buttons, the arrow keys or keys 1-3, '
-        'and Space to dash. Stuck? Spend coins on 50/50 to remove a wrong gate.',
+  builder(
+    'World Builder',
+    Icons.construction_rounded,
+    'Byte is stuck! Each challenge is a tiny program with one blank. Fill the blank, '
+        'press Run code and watch your code change the world: loops build bridges and '
+        'stairs, variables set the jump, printing says the password. Wrong code plays out '
+        'too, so you can see the bug, fix it and try again. No timer - take your time.',
   ),
   battle(
     'Bug Battle',
@@ -54,7 +55,7 @@ enum LevelKind {
   final String howToPlay;
 }
 
-/// A multiple-choice question used by the runner and battle games.
+/// A multiple-choice question used by the battle game.
 @immutable
 class Question {
   const Question({

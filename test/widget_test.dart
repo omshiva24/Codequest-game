@@ -2,13 +2,14 @@ import 'dart:math';
 
 import 'package:codequest/app.dart';
 import 'package:codequest/app_scope.dart';
+import 'package:codequest/data/builder_levels.dart';
 import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/progress.dart';
 import 'package:codequest/screens/achievements_screen.dart';
 import 'package:codequest/screens/battle_screen.dart';
+import 'package:codequest/screens/builder_screen.dart';
 import 'package:codequest/screens/home_screen.dart';
 import 'package:codequest/screens/puzzle_screen.dart';
-import 'package:codequest/screens/runner_screen.dart';
 import 'package:codequest/screens/settings_screen.dart';
 import 'package:codequest/screens/title_screen.dart';
 import 'package:codequest/services/sound.dart';
@@ -94,7 +95,7 @@ void main() {
     expect(find.textContaining('No badges yet'), findsOneWidget);
   });
 
-  testWidgets('world -> lesson -> runner navigation', (tester) async {
+  testWidgets('world -> lesson -> World Builder navigation', (tester) async {
     await pumpApp(tester);
     await tester.tap(find.text('Python Jungle').first);
     await tester.pumpAndSettle();
@@ -108,58 +109,103 @@ void main() {
     await tester.tap(find.text('Hello, Python!'));
     await tester.pumpAndSettle();
     expect(find.text('Talking to the computer'), findsOneWidget);
-    await tester.ensureVisible(find.text('Start Code Runner'));
+    await tester.ensureVisible(find.text('Start World Builder'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Start Code Runner'));
+    await tester.tap(find.text('Start World Builder'));
     await tester.pumpAndSettle();
-    expect(find.byType(RunnerScreen), findsOneWidget);
+    expect(find.byType(BuilderScreen), findsOneWidget);
+    expect(find.textContaining('password HELLO'), findsOneWidget);
   });
 
-  testWidgets('runner: a perfect run gives 3 stars and unlocks level 2', (tester) async {
-    final handle = tester.ensureSemantics();
+  Future<void> chooseAndRun(WidgetTester tester, int option) async {
+    final pick = find.byKey(ValueKey('blank-option-$option'));
+    await tester.ensureVisible(pick);
+    await tester.pump();
+    await tester.tap(pick);
+    await tester.pump();
+    final run = find.text('Run code');
+    await tester.ensureVisible(run);
+    await tester.pump();
+    await tester.tap(run);
+    await tester.pump();
+  }
+
+  Future<void> tapText(WidgetTester tester, String text) async {
+    await tester.ensureVisible(find.text(text));
+    await tester.pump();
+    await tester.tap(find.text(text));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('World Builder: solving every challenge first try gives 3 stars', (tester) async {
     final level = levelById('py-1')!;
-    final progress = await pumpScreen(tester, RunnerScreen(level: level, random: Random(1)));
-    for (var i = 0; i < level.questions.length; i++) {
-      final answer = level.questions[i].correctText;
-      await tester.tap(semantics('^Gate \\d: ${esc(answer)}(, selected)?\$'));
-      await tester.pump();
-      await tester.tap(find.text('Go!'));
-      await tester.pump();
-      expect(find.byIcon(Icons.check_circle_rounded), findsWidgets);
-      await tester.tap(find.text(i == level.questions.length - 1 ? 'See results' : 'Next gate'));
-      await tester.pumpAndSettle();
+    final challenges = builderChallenges('py-1');
+    final progress = await pumpScreen(tester, BuilderScreen(level: level));
+    for (var i = 0; i < challenges.length; i++) {
+      expect(find.text('Challenge ${i + 1} of ${challenges.length}'), findsOneWidget);
+      await chooseAndRun(tester, challenges[i].answer);
+      expect(find.textContaining(RegExp('It works!|Nice landing!')), findsOneWidget);
+      await tapText(tester, i == challenges.length - 1 ? 'See results' : 'Next challenge');
     }
     expect(find.text('Level clear!'), findsWidgets);
-    expect(find.text('Badge unlocked: First steps'), findsOneWidget);
     expect(progress.starsFor('py-1'), 3);
-    expect(progress.bestCombo, level.questions.length);
     expect(progress.isUnlocked(levelById('py-2')!), isTrue);
+  });
+
+  testWidgets('World Builder: a short bridge plays out, explains the bug and costs a heart', (tester) async {
+    final handle = tester.ensureSemantics();
+    final level = levelById('py-4')!;
+    final challenges = builderChallenges('py-4');
+    await pumpScreen(tester, BuilderScreen(level: level));
+    // The first challenge starts on range(2) for a 4-wide gap.
+    await chooseAndRun(tester, challenges.first.initial);
+    expect(find.text('Bug found!'), findsOneWidget);
+    expect(find.textContaining('built only 2 blocks, but the gap is 4 wide'), findsOneWidget);
+    expect(find.bySemanticsLabel('2 of 3 hearts left'), findsOneWidget);
+    // The code editor shows what each line did.
+    expect(semantics(r'^Line 1: for i in range\(2\):\. range\(2\) is done'), findsOneWidget);
+
+    // Fix it and try again.
+    await tapText(tester, 'Try again');
+    await chooseAndRun(tester, challenges.first.answer);
+    expect(find.text('It works!'), findsOneWidget);
     handle.dispose();
   });
 
-  testWidgets('runner: keyboard controls and a wrong gate shows the right answer', (tester) async {
+  testWidgets('World Builder: losing all hearts ends the level', (tester) async {
     final level = levelById('c-1')!;
-    await pumpScreen(tester, RunnerScreen(level: level, random: Random(2)));
-    final q = level.questions.first;
-    await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pump();
-    // Either cheer or "Oops" - both show the explanation.
-    expect(find.text(q.explanation), findsOneWidget);
+    final challenges = builderChallenges('c-1');
+    final progress = await pumpScreen(tester, BuilderScreen(level: level));
+    final wrong = challenges.first.initial; // OPEN without quotes
+    for (var i = 0; i < 3; i++) {
+      await chooseAndRun(tester, wrong);
+      expect(find.text('Code error!'), findsOneWidget);
+      expect(find.textContaining("'OPEN' undeclared"), findsOneWidget);
+      await tapText(tester, i < 2 ? 'Try again' : 'See results');
+    }
+    expect(find.text('Out of hearts!'), findsWidgets);
+    expect(progress.starsFor('c-1'), 0);
+    expect(find.text('Learn from your mistakes'), findsWidgets);
   });
 
-  testWidgets('runner: timer runs out and resolves the gate automatically', (tester) async {
-    final level = levelById('java-1')!;
-    await pumpScreen(
-      tester,
-      RunnerScreen(level: level, random: Random(3)),
-      settings: const AppSettings(reduceMotion: true, timerMode: TimerMode.normal),
-    );
-    expect(find.text(level.questions.first.explanation), findsNothing);
-    await tester.pump(const Duration(seconds: 13));
-    expect(find.text(level.questions.first.explanation), findsOneWidget);
+  testWidgets('World Builder: keyboard picks the blank and runs the code', (tester) async {
+    final level = levelById('java-4')!;
+    final challenges = builderChallenges('java-4');
+    await pumpScreen(tester, BuilderScreen(level: level));
+    final key = [
+      LogicalKeyboardKey.digit1,
+      LogicalKeyboardKey.digit2,
+      LogicalKeyboardKey.digit3,
+      LogicalKeyboardKey.digit4,
+      LogicalKeyboardKey.digit5,
+      LogicalKeyboardKey.digit6,
+      LogicalKeyboardKey.digit7,
+    ][challenges.first.answer];
+    await tester.sendKeyEvent(key);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
+    await tester.pump();
+    expect(find.text('It works!'), findsOneWidget);
   });
 
   testWidgets('battle: wrong answers come back and the monster can still be beaten', (tester) async {
@@ -238,10 +284,10 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('runner: 50/50 spends coins and removes a wrong gate', (tester) async {
+  testWidgets('battle: 50/50 spends coins and removes wrong moves', (tester) async {
     final handle = tester.ensureSemantics();
-    final level = levelById('cpp-1')!;
-    final progress = await pumpScreen(tester, RunnerScreen(level: level, random: Random(7)));
+    final level = levelById('cpp-2')!;
+    final progress = await pumpScreen(tester, BattleScreen(level: level, random: Random(7)));
 
     // No coins yet: the power-up explains how to earn them.
     await tester.tap(semantics('^Use 50/50'));
@@ -254,7 +300,7 @@ void main() {
     await tester.tap(semantics('^Use 50/50'));
     await tester.pump();
     expect(progress.coins, before - 15);
-    expect(semantics('removed by 50/50'), findsOneWidget);
+    expect(semantics('removed by 50/50'), findsNWidgets(2));
     expect(semantics('^50/50 already used'), findsOneWidget);
     handle.dispose();
   });
