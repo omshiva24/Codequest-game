@@ -1,6 +1,6 @@
 # 🦉 CodeQuest — Learn to Code by Playing
 
-**CodeQuest** is a game that teaches **Python, C, C++ and Java** the way Mario, Temple Run and Pokémon keep you hooked: worlds to unlock, runs to survive, monsters to beat — and a friendly **Doubt Buddy** that answers your questions in simple words.
+**CodeQuest** is a game that teaches **Python, C, C++ and Java** the way Mario and Pokémon keep you hooked: worlds to unlock, monsters to beat — and, best of all, **code that changes the world**. Your loop builds the bridge. Your variable sets the jump. A friendly **Doubt Buddy** answers your questions in simple words.
 
 Built with **Flutter** (one codebase for web + Android/iOS), deployed on **Vercel**.
 
@@ -18,21 +18,24 @@ Press **Play** on the title screen, pick a world and climb its winding map. Ever
 
 | | Mini-game | Inspired by | What you do |
 |---|---|---|---|
-| 🏃 | **Code Runner** | Temple Run | Answers are gates rushing down a 3-lane track. Switch lanes and dash through the right gate before it reaches you. |
+| 🧱 | **World Builder** | Mario | Byte is stuck at a river, a ledge, a guard or a troll's toll gate. Fill the blank in a tiny program and press **Run code**: each line lights up as it runs, and the world changes — loops build bridges and stairs, a variable sets the jump height, `print` says the password. **Wrong code plays out too**: build one block too few and Byte falls in, and Byte explains exactly why (`range(1, 4)` only counts 1, 2, 3). Fix it and try again. |
 | 👾 | **Bug Battle** | Pokémon | A bug monster attacks. Pick the right move to fire a code bolt at it. Missed questions come back so you can still win. |
-| 🧱 | **Block Builder** | Code editor | Snap shuffled code blocks into the editor in the right order, press **Run code** and watch the program's output appear in the console. |
+| 🧩 | **Block Builder** | Code editor | Snap shuffled code blocks into the editor in the right order, press **Run code** and watch the program's output appear in the console. |
 
-Each language is a **world** with its own animated scene and 5 levels. The 5th level is a **boss**:
+Each language is a **world** with its own animated scene and 5 levels. Levels 1 and 4 are World Builder levels (printing, strings, variables and maths; then loops), and the 5th level is a **boss**:
 
 | World | Scene | Levels |
 |---|---|---|
-| 🐍 Python Jungle | Jungle with fireflies and swaying vines | Hello Python → Variables & Types → If/Else → Loops → **Boss: Functions** (Bug King) |
-| 💎 C Caves | Crystal cave with dripping water | Hello C → Variables & Types → If/Else → Loops → **Boss: Functions** (Segfault Dragon) |
-| 🏰 C++ Castle | Castle under the stars, waving flags | Hello C++ → Variables & Types → If/Else → Loops & vectors → **Boss: Classes** (Null Pointer Ghost) |
-| 🌋 Java Volcano | Erupting volcano with rising embers | Hello Java → Variables & Types → If/Else → Loops & arrays → **Boss: Methods & Objects** (Exception Hydra) |
+| 🐍 Python Jungle | Jungle river, fireflies and swaying vines | Hello Python → Variables & Types → If/Else → Loop Bridges → **Boss: Functions** (Bug King) |
+| 💎 C Caves | Crystal pit with dripping water | Hello C → Variables & Types → If/Else → Loop Bridges → **Boss: Functions** (Segfault Dragon) |
+| 🏰 C++ Castle | Castle moat under the stars | Hello C++ → Variables & Types → If/Else → Loop Bridges → **Boss: Classes** (Null Pointer Ghost) |
+| 🌋 Java Volcano | Lava river and rising embers | Hello Java → Variables & Types → If/Else → Loop Bridges → **Boss: Methods & Objects** (Exception Hydra) |
+
+The same idea is written in each world's real syntax — `for i in range(4):` in Python, `for (int i = 0; i < 4; i++) {` in C, C++ and Java; `print("HELLO")`, `printf("OPEN");`, `cout << "CASTLE";`, `System.out.println("LAVA");` — so you also learn how the languages differ (for example, `'LAVA'` is an error in Java because single quotes hold one character).
 
 ### What keeps players coming back
-- **Combos:** answer correctly in a row for a combo streak (x2, x3…). Your best combo is saved.
+- **See your code run:** in World Builder every line lights up as it runs, with notes like `i = 2` or `coins = 6 + 3 = 9`. Off-by-one bugs become something you *see*.
+- **Combos:** in battles, answer correctly in a row for a combo streak (x2, x3…). Your best combo is saved.
 - **Coins and power-ups:** spend coins on **50/50**, which removes wrong answers. You learn by narrowing down instead of guessing.
 - **Stars, XP, player levels and ranks** (Newbie Coder → Code Wizard), plus a **daily streak**.
 - **11 badges** in the **Trophy room**: First steps, Flawless, Combo king, Curious mind, Boss slayer, Polyglot and more.
@@ -51,8 +54,10 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | Title screen | Home | World map |
 |---|---|---|
 | ![Title](docs/screenshots/00-title.png) | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) |
-| **Lesson with Byte** | **Code Runner** | **Right gate!** |
-| ![Lesson](docs/screenshots/03-lesson.png) | ![Runner](docs/screenshots/04-runner.png) | ![Runner feedback](docs/screenshots/05-runner-correct.png) |
+| **Lesson with Byte** | **World Builder: say the password** | **The gate opens** |
+| ![Lesson](docs/screenshots/03-lesson.png) | ![World Builder](docs/screenshots/04-builder.png) | ![Password](docs/screenshots/05-builder-password.png) |
+| **A variable sets the jump** | **Bug! One block short...** | **Byte explains the bug** |
+| ![Jump](docs/screenshots/05b-builder-jump.png) | ![Fall](docs/screenshots/05c-builder-fall.png) | ![Bug](docs/screenshots/05d-builder-bug.png) |
 | **Level clear** | **Bug Battle** | **Code bolt attack** |
 | ![Results](docs/screenshots/06-results.png) | ![Battle](docs/screenshots/07-battle.png) | ![Attack](docs/screenshots/08-battle-attack.png) |
 | **Learning from a miss** | **Block Builder** | **Run code: console output** |
@@ -94,11 +99,12 @@ See [SECURITY.md](SECURITY.md).
 ### 🧪 Testing
 - **Flutter tests** (`flutter test`):
   - [`curriculum_test.dart`](test/curriculum_test.dart) — every level/question/puzzle is well-formed (unique ids, valid answers, no duplicate options…)
-  - [`game_logic_test.dart`](test/game_logic_test.dart) — runner/battle rules, combos, 50/50 power-up, puzzle rules, hints, stars, XP
+  - [`builder_test.dart`](test/builder_test.dart) — World Builder: every challenge has exactly one right answer and starts on a wrong one, real syntax per language, loop/off-by-one/while/running-total simulation, strings and quotes, hearts and retries, Byte's animation path for every outcome
+  - [`game_logic_test.dart`](test/game_logic_test.dart) — battle rules, combos, 50/50 power-up, puzzle rules, hints, stars, XP
   - [`progress_test.dart`](test/progress_test.dart) — unlocking, streaks, badges, coin spending, saving/loading, tampered-data handling
   - [`sound_test.dart`](test/sound_test.dart) — every sound effect is short and quiet, and playing sounds is safe on every platform
   - [`doubt_service_test.dart`](test/doubt_service_test.dart) — input sanitising, topic matching, AI → offline fallback with a mock server
-  - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: runner (keyboard, timer, 50/50), battle, puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
+  - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: World Builder (perfect run, a bug that costs a heart, running out of hearts, keyboard), battle (incl. 50/50), puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
   - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 12 screens, in normal and high-contrast mode
 - **API tests** (`npm test`) — validation, rate limiting, origin check, handler status codes.
 - **End-to-end:** the screenshot workflow plays the real web build in Chrome and fails on errors or CSP violations.
@@ -144,13 +150,13 @@ To enable the AI tutor, add an environment variable in Vercel → Project → Se
 
 ```
 lib/
-  data/          curriculum.dart (lessons & questions), doubt_kb.dart (offline tutor), fun_facts.dart
-  logic/         quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart, achievements.dart
+  data/          curriculum.dart (lessons & questions), builder_levels.dart (World Builder challenges), doubt_kb.dart (offline tutor), fun_facts.dart
+  logic/         builder.dart (World Builder engine: code in 4 syntaxes + step-by-step simulation), quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart, achievements.dart
   models/        models.dart
-  screens/       title, home hub, world map, lesson, runner, battle, puzzle, results, trophy room, doubt buddy, settings
+  screens/       title, home hub, world map, lesson, world builder, battle, puzzle, results, trophy room, doubt buddy, settings
   services/      doubt_service.dart (offline tutor + secure AI client)
   theme/         app_theme.dart (normal + high contrast)
-  widgets/       game_ui.dart (buttons, panels, HUD), scenes.dart (painted worlds), effects.dart (confetti, shake...)
+  widgets/       game_ui.dart (buttons, panels, HUD), scenes.dart (painted worlds), builder_stage.dart (side-scrolling stage + Byte), effects.dart (confetti, shake...)
 api/             ask.js (serverless AI endpoint), _lib/tutor.js (validation, rate limit)
 api-tests/       Node tests for the API
 test/            Flutter unit, widget and accessibility tests
