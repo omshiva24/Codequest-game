@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
@@ -68,8 +69,8 @@ Route<T> gameRoute<T>(Widget page) => PageRouteBuilder<T>(
       },
     );
 
-void openLesson(BuildContext context, Level level, {bool replace = false}) {
-  final route = gameRoute<void>(LessonScreen(level: level));
+void openLesson(BuildContext context, Level level, {bool replace = false, bool afterDemo = false}) {
+  final route = gameRoute<void>(LessonScreen(level: level, afterDemo: afterDemo));
   if (replace) {
     Navigator.of(context).pushReplacement(route);
   } else {
@@ -78,9 +79,9 @@ void openLesson(BuildContext context, Level level, {bool replace = false}) {
 }
 
 /// Starts the right mini-game for [level], replacing the current screen.
-void startGame(BuildContext context, Level level) {
+void startGame(BuildContext context, Level level, {bool stepByStep = false}) {
   final Widget page = switch (level.kind) {
-    LevelKind.runner => RunnerScreen(level: level),
+    LevelKind.runner => RunnerScreen(level: level, stepByStep: stepByStep),
     LevelKind.battle => BattleScreen(level: level),
     LevelKind.puzzle => PuzzleScreen(level: level),
   };
@@ -107,11 +108,16 @@ void watchDemoRun(BuildContext context, Level level) {
 }
 
 /// Whether the action runner is used. Reduce motion, the "No timer" setting
-/// and screen readers get the calm, step-by-step runner instead.
+/// and phone screen readers get the calm, step-by-step runner instead (and
+/// every runner lesson offers a "Play step by step" button).
 bool usesActionRunner(BuildContext context) =>
     !reduceMotionOf(context, listen: false) &&
     AppScope.read(context).settings.timerMode != TimerMode.off &&
-    !MediaQuery.accessibleNavigationOf(context);
+    // On the web Flutter reports "accessible navigation" whenever its
+    // screen-reader layer is on - and CodeQuest turns that on for everyone so
+    // screen readers work at once. So only trust it on phones (TalkBack and
+    // VoiceOver), where it really means a screen reader is running.
+    (kIsWeb || !MediaQuery.accessibleNavigationOf(context));
 
 void openDoubtBuddy(
   BuildContext context, {

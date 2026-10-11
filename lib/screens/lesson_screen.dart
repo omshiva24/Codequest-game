@@ -10,9 +10,12 @@ import 'navigation.dart';
 
 /// Before each level, Byte explains the idea in a short dialogue.
 class LessonScreen extends StatelessWidget {
-  const LessonScreen({super.key, required this.level});
+  const LessonScreen({super.key, required this.level, this.afterDemo = false});
 
   final Level level;
+
+  /// Shown after "Watch Byte play" ends.
+  final bool afterDemo;
 
   /// Splits the story into speech bubbles of about two sentences.
   static List<String> bubbles(String story) {
@@ -51,6 +54,28 @@ class LessonScreen extends StatelessWidget {
                 if (level.isBoss) const PanelBanner(text: 'Boss level', tone: ButtonTone.coral, icon: Icons.whatshot_rounded),
               ],
             ),
+            if (afterDemo) ...[
+              const SizedBox(height: 12),
+              Semantics(
+                liveRegion: true,
+                container: true,
+                child: ParchmentPanel(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      const ByteAvatar(size: 44),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "That was Byte's demo run. Now it's your turn: press Start below!",
+                          style: displayStyle(18, color: g.ink, height: 1.25),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,6 +184,14 @@ class LessonScreen extends StatelessWidget {
                 icon: Icons.smart_toy_rounded,
                 label: 'Watch Byte play',
                 semanticLabel: 'Watch Byte play a demo run first. Nothing is saved.',
+              ),
+              const SizedBox(height: 6),
+              GameButton(
+                tone: ButtonTone.parchment,
+                expand: true,
+                onPressed: () => startGame(context, level, stepByStep: true),
+                icon: Icons.accessibility_new_rounded,
+                label: 'Play step by step (no timer)',
               ),
             ],
             const SizedBox(height: 6),

@@ -9,6 +9,7 @@ import 'package:codequest/logic/run_autopilot.dart';
 import 'package:codequest/logic/run_engine.dart';
 import 'package:codequest/screens/lesson_screen.dart';
 import 'package:codequest/screens/result_screen.dart';
+import 'package:codequest/screens/runner_screen.dart';
 import 'package:codequest/screens/temple_run.dart';
 import 'package:codequest/services/doubt_service.dart';
 import 'package:codequest/theme/app_theme.dart';
@@ -18,11 +19,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _frame = Duration(milliseconds: 50);
 
-Future<ProgressController> _pump(WidgetTester tester, Widget screen) async {
+Future<ProgressController> _pump(WidgetTester tester, Widget screen, {AppSettings settings = const AppSettings()}) async {
   tester.view.physicalSize = const Size(1000, 1400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final progress = ProgressController(storage: MemoryProgressStorage());
+  final progress = ProgressController(storage: MemoryProgressStorage())..updateSettings(settings);
   await tester.pumpWidget(AppScope(
     controller: progress,
     doubtService: DoubtService(),
@@ -122,5 +123,29 @@ void main() {
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
     handle.dispose();
+  });
+
+  testWidgets('runner lessons offer the demo and a step-by-step mode', (tester) async {
+    final level = levelById('py-1')!;
+    await _pump(tester, LessonScreen(level: level));
+    await _frames(tester, 1);
+    expect(find.text('Watch Byte play'), findsOneWidget);
+    expect(find.text('Play step by step (no timer)'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Play step by step (no timer)'));
+    await tester.pump();
+    await tester.tap(find.text('Play step by step (no timer)'));
+    await _frames(tester, 1);
+    expect(find.byType(RunnerScreen), findsOneWidget);
+    expect(find.byType(TempleRun), findsNothing, reason: 'step by step uses the calm runner');
+    expect(find.text('Go!'), findsOneWidget, reason: 'no timer: the player presses Go');
+  });
+
+  testWidgets('with Reduce motion the runner is calm and the demo is not offered', (tester) async {
+    final level = levelById('py-1')!;
+    await _pump(tester, LessonScreen(level: level), settings: const AppSettings(reduceMotion: true));
+    await tester.pump();
+    expect(find.text('Watch Byte play'), findsNothing);
+    expect(find.text('Play step by step (no timer)'), findsNothing);
   });
 }

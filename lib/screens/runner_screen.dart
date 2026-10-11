@@ -24,12 +24,15 @@ import 'temple_run.dart';
 /// With Reduce motion, the "No timer" setting or a screen reader it becomes
 /// a calm, step-by-step version instead.
 class RunnerScreen extends StatefulWidget {
-  const RunnerScreen({super.key, required this.level, this.random});
+  const RunnerScreen({super.key, required this.level, this.random, this.stepByStep = false});
 
   final Level level;
 
   /// Injected in tests to make option order and the track predictable.
   final Random? random;
+
+  /// The player chose "Play step by step": calm runner without a timer.
+  final bool stepByStep;
 
   @override
   State<RunnerScreen> createState() => _RunnerScreenState();
@@ -42,12 +45,12 @@ class _RunnerScreenState extends State<RunnerScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Decide once, so the mode never flips in the middle of a level.
-    _calm ??= !usesActionRunner(context);
+    _calm ??= widget.stepByStep || !usesActionRunner(context);
   }
 
   @override
   Widget build(BuildContext context) => _calm!
-      ? _CalmRunner(level: widget.level, random: widget.random)
+      ? _CalmRunner(level: widget.level, random: widget.random, noTimer: widget.stepByStep)
       : TempleRun(level: widget.level, random: widget.random);
 }
 
@@ -55,10 +58,11 @@ class _RunnerScreenState extends State<RunnerScreen> {
 /// pick a lane and press Go. Used with Reduce motion, the "No timer" setting
 /// or a screen reader, so everyone can play.
 class _CalmRunner extends StatefulWidget {
-  const _CalmRunner({required this.level, this.random});
+  const _CalmRunner({required this.level, this.random, this.noTimer = false});
 
   final Level level;
   final Random? random;
+  final bool noTimer;
 
   @override
   State<_CalmRunner> createState() => _CalmRunnerState();
@@ -110,7 +114,7 @@ class _CalmRunnerState extends State<_CalmRunner> with TickerProviderStateMixin 
     super.dispose();
   }
 
-  TimerMode get _timerMode => AppScope.read(context).settings.timerMode;
+  TimerMode get _timerMode => widget.noTimer ? TimerMode.off : AppScope.read(context).settings.timerMode;
   bool get _reduceMotion => reduceMotionOf(context, listen: false);
 
   Duration? get _roundDuration => switch (_timerMode) {
