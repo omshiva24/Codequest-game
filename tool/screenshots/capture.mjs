@@ -259,8 +259,8 @@ try {
   await locate('+5 coins', { timeout: 20000 });
   await sleep(300);
   await shot('05b-runner-action');
-  // The demo ends back on the lesson.
-  await locate('Watch Byte play', { timeout: 150000 });
+  // The demo ends back on the lesson, with a "your turn" banner at the top.
+  await locate("Byte's demo run", { timeout: 180000 });
   await sleep(800);
 
   // Play level 1 for real in the calm, step-by-step runner ("No timer"),
