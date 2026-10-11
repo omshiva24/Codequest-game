@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../app_scope.dart';
 import '../logic/progress.dart';
 import '../logic/quiz_session.dart';
+import '../logic/run_engine.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
 import '../services/sound.dart';
@@ -15,24 +16,58 @@ import '../widgets/effects.dart';
 import '../widgets/game_ui.dart';
 import '../widgets/scenes.dart';
 import 'navigation.dart';
+import 'temple_run.dart';
 
-/// Cost of the 50/50 power-up, in coins.
-const int fiftyFiftyCost = 15;
-
-/// Temple-Run style game: answers are gates rushing down a 3-lane track.
+/// Code Runner: a Temple-Run style endless runner. The runner keeps moving;
+/// switch lanes, jump and slide past obstacles, grab coins and run through
+/// the gate with the right answer while the Bug Monster chases you.
+///
+/// With Reduce motion, the "No timer" setting or a screen reader it becomes
+/// a calm, step-by-step version instead.
 class RunnerScreen extends StatefulWidget {
   const RunnerScreen({super.key, required this.level, this.random});
 
   final Level level;
 
-  /// Injected in tests to make option order predictable.
+  /// Injected in tests to make option order and the track predictable.
   final Random? random;
 
   @override
   State<RunnerScreen> createState() => _RunnerScreenState();
 }
 
-class _RunnerScreenState extends State<RunnerScreen> with TickerProviderStateMixin {
+class _RunnerScreenState extends State<RunnerScreen> {
+  bool? _calm;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Decide once, so the mode never flips in the middle of a level.
+    _calm ??= reduceMotionOf(context, listen: false) ||
+        AppScope.read(context).settings.timerMode == TimerMode.off ||
+        MediaQuery.accessibleNavigationOf(context);
+  }
+
+  @override
+  Widget build(BuildContext context) => _calm!
+      ? _CalmRunner(level: widget.level, random: widget.random)
+      : TempleRun(level: widget.level, random: widget.random);
+}
+
+/// Calm mode: the step-by-step version. One gate at a time, no obstacles;
+/// pick a lane and press Go. Used with Reduce motion, the "No timer" setting
+/// or a screen reader, so everyone can play.
+class _CalmRunner extends StatefulWidget {
+  const _CalmRunner({required this.level, this.random});
+
+  final Level level;
+  final Random? random;
+
+  @override
+  State<_CalmRunner> createState() => _CalmRunnerState();
+}
+
+class _CalmRunnerState extends State<_CalmRunner> with TickerProviderStateMixin {
   static const _cheers = ['Awesome!', 'Nailed it!', 'Great run!', 'Perfect!', 'Super coder!'];
 
   late final QuizSession _session = QuizSession(widget.level.questions, random: widget.random);

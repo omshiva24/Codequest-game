@@ -15,6 +15,10 @@ enum Sfx {
   defeat,
   levelUp,
   badge,
+  pickup,
+  jump,
+  slide,
+  tick,
 }
 
 /// One beep: a frequency (Hz) played for [duration] seconds.
@@ -94,6 +98,14 @@ const Map<Sfx, List<Tone>> sfxTones = {
     Tone(_e6, 0.06),
     Tone(_g6, 0.22),
   ],
+  // Runner: a tiny coin blip (many in a row), jump/slide swooshes, countdown.
+  Sfx.pickup: [
+    Tone(_b5, 0.035, volume: 0.035),
+    Tone(_e6, 0.08, volume: 0.035),
+  ],
+  Sfx.jump: [Tone(320, 0.14, wave: 'triangle', slideTo: 720, volume: 0.05)],
+  Sfx.slide: [Tone(420, 0.16, wave: 'triangle', slideTo: 150, volume: 0.045)],
+  Sfx.tick: [Tone(_a5, 0.08, volume: 0.05)],
   Sfx.badge: [
     Tone(_a5, 0.08, wave: 'triangle', volume: 0.07),
     Tone(_d6, 0.08, wave: 'triangle', volume: 0.07),

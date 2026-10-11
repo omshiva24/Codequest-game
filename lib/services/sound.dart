@@ -42,10 +42,14 @@ class SoundFx {
     }
   }
 
+  static Future<void> _noVibration() async {}
+
   static void _vibrate(Sfx sfx) {
     if (kIsWeb) return;
     final Future<void> Function() haptic = switch (sfx) {
-      Sfx.tap => HapticFeedback.selectionClick,
+      Sfx.tap || Sfx.jump || Sfx.slide || Sfx.tick => HapticFeedback.selectionClick,
+      // Coins come in quick rows; buzzing for each would be annoying.
+      Sfx.pickup => _noVibration,
       Sfx.correct || Sfx.coin || Sfx.star || Sfx.powerUp => HapticFeedback.lightImpact,
       Sfx.hit || Sfx.victory || Sfx.levelUp || Sfx.badge => HapticFeedback.mediumImpact,
       Sfx.wrong || Sfx.defeat => HapticFeedback.heavyImpact,

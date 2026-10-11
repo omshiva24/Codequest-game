@@ -115,6 +115,12 @@ class QuizSession {
     );
   }
 
+  /// Costs a heart for something other than a wrong answer, like crashing
+  /// into an obstacle in the runner.
+  void loseLife() {
+    if (lives > 0) lives--;
+  }
+
   AnswerResult answer(int choice) {
     final q = current;
     if (q == null) throw StateError('The session is already over.');
