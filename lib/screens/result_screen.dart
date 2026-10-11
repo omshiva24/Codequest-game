@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../app_scope.dart';
 import '../data/curriculum.dart';
 import '../logic/progress.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
+import '../widgets/effects.dart';
+import '../widgets/game_ui.dart';
+import '../widgets/scenes.dart';
 import 'navigation.dart';
 
+/// The celebration (or "try again") screen after a level.
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key, required this.outcome, required this.reward});
 
@@ -18,165 +21,282 @@ class ResultScreen extends StatelessWidget {
     final g = GameColors.of(context);
     final level = outcome.level;
     final next = nextLevel(level);
-    final reduceMotion = reduceMotionOf(context);
+    final won = outcome.won;
+    final headline = won ? (level.isBoss ? 'Boss defeated!' : 'Level clear!') : 'Out of hearts!';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(level.title),
-        automaticallyImplyLeading: false,
-      ),
-      body: PageBody(
-        maxWidth: 720,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
-            Center(child: Emoji(outcome.won ? (level.isBoss ? '🏆' : '🎉') : '💥', size: 72)),
-            const SizedBox(height: 8),
-            Semantics(
-              header: true,
-              liveRegion: true,
-              child: Text(
-                outcome.won ? (level.isBoss ? 'Boss defeated!' : 'Level complete!') : 'Out of hearts!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              outcome.won
-                  ? 'You got ${outcome.correct} of ${outcome.total} right first time.'
-                  : 'Every bug you meet makes you a stronger coder. Read the tips below and try again!',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: g.textDim, fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: reduceMotion ? 1 : 0.4, end: 1),
-                duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 600),
-                curve: Curves.elasticOut,
-                builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
-                child: StarRow(stars: outcome.stars, size: 56),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                StatPill(
-                  icon: Icons.bolt_rounded,
-                  value: '+${reward.xp} XP',
-                  semanticLabel: 'Plus ${reward.xp} experience points',
-                ),
-                StatPill(
-                  icon: Icons.monetization_on_rounded,
-                  value: '+${reward.coins}',
-                  semanticLabel: 'Plus ${reward.coins} coins',
-                ),
-                if (reward.newBest && reward.stars > 0)
-                  const StatPill(
-                    icon: Icons.emoji_events_rounded,
-                    value: 'New best!',
-                    semanticLabel: 'New best score',
+    return Stack(
+      children: [
+        Positioned.fill(child: SceneBackground(kind: won ? SceneKind.victory : SceneKind.defeat)),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: PageBody(
+              maxWidth: 680,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 36),
+                children: [
+                  Center(child: PopIn(child: Emoji(won ? (level.isBoss ? '🏆' : '🎉') : '💥', size: 76))),
+                  const SizedBox(height: 6),
+                  Center(
+                    child: Semantics(
+                      liveRegion: true,
+                      child: OutlinedText(
+                        headline,
+                        size: 46,
+                        header: true,
+                        textAlign: TextAlign.center,
+                        color: won ? g.gold : g.coral,
+                      ),
+                    ),
                   ),
-                if (reward.leveledUp)
-                  const StatPill(
-                    icon: Icons.arrow_circle_up_rounded,
-                    value: 'Level up!',
-                    semanticLabel: 'You reached a new player level',
+                  const SizedBox(height: 10),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: g.ink.withValues(alpha: g.highContrast ? 1 : 0.75),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        won
+                            ? 'You got ${outcome.correct} of ${outcome.total} right first time.'
+                            : 'Every bug makes you a stronger coder. Read the tips below and try again!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: g.onNight, fontSize: 16, height: 1.4),
+                      ),
+                    ),
                   ),
-              ],
-            ),
-            if (reward.unlockedNext != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Unlocked: Level ${reward.unlockedNext!.number} - ${reward.unlockedNext!.title}',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: g.good, fontWeight: FontWeight.w700, fontSize: 16),
-              ),
-            ],
-            const SizedBox(height: 20),
-            if (outcome.won && next != null)
-              FilledButton.icon(
-                autofocus: true,
-                onPressed: () => openLesson(context, next, replace: true),
-                icon: const Icon(Icons.skip_next_rounded),
-                label: Text('Next: ${next.title}'),
-              ),
-            if (outcome.won && next == null)
-              FilledButton.icon(
-                autofocus: true,
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.map_rounded),
-                label: const Text('World complete! Back to map'),
-              ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              autofocus: !outcome.won,
-              onPressed: () => startGame(context, level),
-              icon: const Icon(Icons.replay_rounded),
-              label: const Text('Play again'),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.map_rounded),
-              label: const Text('World map'),
-            ),
-            if (outcome.review.isNotEmpty) ...[
-              const SizedBox(height: 28),
-              Semantics(
-                header: true,
-                child: Text('Learn from your mistakes',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: g.coin)),
-              ),
-              const SizedBox(height: 10),
-              for (final item in outcome.review) ...[
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.prompt,
-                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                        if (item.code != null) ...[
-                          const SizedBox(height: 8),
-                          CodeBlock(item.code!, fontSize: 14),
-                        ],
-                        const SizedBox(height: 8),
-                        Text.rich(
-                          TextSpan(children: [
-                            const TextSpan(text: 'Answer: '),
-                            TextSpan(
-                              text: item.correctAnswer,
-                              style: TextStyle(fontFamily: codeFont, color: g.good, fontWeight: FontWeight.w700),
+                  const SizedBox(height: 18),
+                  Semantics(
+                    label: '${outcome.stars} of 3 stars',
+                    container: true,
+                    child: ExcludeSemantics(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          for (var i = 0; i < 3; i++)
+                            Padding(
+                              padding: EdgeInsets.only(bottom: i == 1 ? 18 : 0),
+                              child: PopIn(
+                                delay: Duration(milliseconds: 350 + i * 300),
+                                child: GameStar(filled: i < outcome.stars, size: i == 1 ? 70 : 56, g: g),
+                              ),
                             ),
-                          ]),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  ParchmentPanel(
+                    child: Column(
+                      children: [
+                        Wrap(
+                          alignment: WrapAlignment.spaceEvenly,
+                          spacing: 22,
+                          runSpacing: 12,
+                          children: [
+                            _RewardStat(
+                              icon: Icon(Icons.bolt_rounded, color: g.ink, size: 30),
+                              value: reward.xp,
+                              label: 'XP',
+                            ),
+                            _RewardStat(icon: const CoinIcon(size: 28), value: reward.coins, label: 'coins'),
+                            if (outcome.bestCombo >= 2)
+                              _RewardStat(
+                                icon: const Emoji('⚡', size: 26),
+                                value: outcome.bestCombo,
+                                label: 'best combo',
+                                prefix: 'x',
+                              ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(item.explanation, style: TextStyle(color: g.textDim, height: 1.4)),
-                        const SizedBox(height: 8),
-                        TextButton.icon(
-                          onPressed: () => openDoubtBuddy(
-                            context,
-                            lang: level.lang,
-                            question: item.prompt,
-                            extraContext: '${item.code ?? ''}\nAnswer: ${item.correctAnswer}. '
-                                '${item.explanation}',
+                        if (reward.newBest && reward.stars > 0 || reward.leveledUp || reward.unlockedNext != null) ...[
+                          const SizedBox(height: 12),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (reward.newBest && reward.stars > 0)
+                                const PanelBanner(text: 'New best!', tone: ButtonTone.gold, icon: Icons.emoji_events_rounded),
+                              if (reward.leveledUp)
+                                const PanelBanner(text: 'Level up!', tone: ButtonTone.lilac, icon: Icons.arrow_circle_up_rounded),
+                              if (reward.unlockedNext != null)
+                                PanelBanner(
+                                  text: 'Unlocked: ${reward.unlockedNext!.title}',
+                                  tone: ButtonTone.mint,
+                                  icon: Icons.lock_open_rounded,
+                                ),
+                            ],
                           ),
-                          icon: const Icon(Icons.support_agent_rounded),
-                          label: const Text('Still confused? Ask Doubt Buddy'),
-                        ),
+                        ],
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  for (final (i, badge) in reward.newAchievements.indexed) ...[
+                    const SizedBox(height: 8),
+                    PopIn(
+                      delay: Duration(milliseconds: 1300 + i * 250),
+                      child: ParchmentPanel(
+                        color: g.gold,
+                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: g.parchment,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: g.ink, width: 3),
+                              ),
+                              child: Emoji(badge.emoji, size: 28),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Badge unlocked: ${badge.title}', style: displayStyle(20, color: g.ink)),
+                                  Text(badge.description, style: TextStyle(color: g.ink, fontSize: 15)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  if (won && next != null)
+                    GameButton(
+                      autofocus: true,
+                      expand: true,
+                      size: GameButtonSize.large,
+                      onPressed: () => openLesson(context, next, replace: true),
+                      icon: Icons.skip_next_rounded,
+                      label: 'Next: ${next.title}',
+                    ),
+                  if (won && next == null)
+                    GameButton(
+                      autofocus: true,
+                      expand: true,
+                      size: GameButtonSize.large,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icons.map_rounded,
+                      label: 'World complete! Back to map',
+                    ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GameButton(
+                          autofocus: !won,
+                          tone: won ? ButtonTone.sky : ButtonTone.gold,
+                          expand: true,
+                          onPressed: () => startGame(context, level),
+                          icon: Icons.replay_rounded,
+                          label: 'Play again',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GameButton(
+                          tone: ButtonTone.parchment,
+                          expand: true,
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: Icons.map_rounded,
+                          label: 'World map',
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (outcome.review.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const OutlinedText('Learn from your mistakes', size: 28, header: true),
+                    const SizedBox(height: 10),
+                    for (final item in outcome.review) ...[
+                      ParchmentPanel(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item.prompt, style: displayStyle(20, color: g.ink, height: 1.25)),
+                            if (item.code != null) ...[
+                              const SizedBox(height: 8),
+                              CodeBlock(item.code!, fontSize: 14),
+                            ],
+                            const SizedBox(height: 8),
+                            Text.rich(
+                              TextSpan(children: [
+                                const TextSpan(text: 'Answer: '),
+                                TextSpan(
+                                  text: item.correctAnswer,
+                                  style: const TextStyle(fontFamily: codeFont, fontWeight: FontWeight.w700),
+                                ),
+                              ]),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(item.explanation, style: TextStyle(color: g.parchmentDim, height: 1.45)),
+                            const SizedBox(height: 10),
+                            GameButton(
+                              tone: ButtonTone.sky,
+                              size: GameButtonSize.small,
+                              onPressed: () => openDoubtBuddy(
+                                context,
+                                lang: level.lang,
+                                question: item.prompt,
+                                extraContext:
+                                    '${item.code ?? ''}\nAnswer: ${item.correctAnswer}. ${item.explanation}',
+                              ),
+                              icon: Icons.support_agent_rounded,
+                              label: 'Still confused? Ask Doubt Buddy',
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned.fill(child: ConfettiBurst(trigger: won ? 1 : 0)),
+      ],
+    );
+  }
+}
+
+class _RewardStat extends StatelessWidget {
+  const _RewardStat({required this.icon, required this.value, required this.label, this.prefix = '+'});
+
+  final Widget icon;
+  final int value;
+  final String label;
+  final String prefix;
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GameColors.of(context);
+    return Semantics(
+      label: '$prefix$value $label',
+      container: true,
+      child: ExcludeSemantics(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CountUp(value: value, prefix: prefix, style: displayStyle(30, color: g.ink, height: 1)),
+                Text(label, style: TextStyle(color: g.parchmentDim, fontSize: 14)),
               ],
-            ],
+            ),
           ],
         ),
       ),

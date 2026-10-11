@@ -31,3 +31,6 @@ flutter:
     - family: CodeMono
       fonts:
         - asset: assets/fonts/DejaVuSansMono.ttf
+    - family: Lilita
+      fonts:
+        - asset: assets/fonts/LilitaOne-Regular.ttf

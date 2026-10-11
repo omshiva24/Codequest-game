@@ -33,6 +33,7 @@ class GameOutcome {
     required this.total,
     required this.stars,
     this.review = const [],
+    this.bestCombo = 0,
   });
 
   final Level level;
@@ -41,9 +42,26 @@ class GameOutcome {
   final int total;
   final int stars;
   final List<ReviewItem> review;
+
+  /// Most right answers in a row during this play.
+  final int bestCombo;
 }
 
-Route<T> gameRoute<T>(Widget page) => MaterialPageRoute<T>(builder: (_) => page);
+/// Page change with a quick game-style "zoom in" (a plain cut when motion is
+/// reduced).
+Route<T> gameRoute<T>(Widget page) => PageRouteBuilder<T>(
+      transitionDuration: const Duration(milliseconds: 320),
+      reverseTransitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (context, animation, _, child) {
+        if (MediaQuery.disableAnimationsOf(context)) return child;
+        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutBack);
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: Tween(begin: 0.92, end: 1.0).animate(curved), child: child),
+        );
+      },
+    );
 
 void openLesson(BuildContext context, Level level, {bool replace = false}) {
   final route = gameRoute<void>(LessonScreen(level: level));
@@ -70,6 +88,7 @@ void finishLevel(BuildContext context, GameOutcome outcome) {
     outcome.level,
     stars: outcome.stars,
     correct: outcome.correct,
+    bestCombo: outcome.bestCombo,
   );
   Navigator.of(context).pushReplacement(
     gameRoute<void>(ResultScreen(outcome: outcome, reward: reward)),
@@ -95,7 +114,7 @@ Future<bool> confirmQuit(BuildContext context) async {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Leave this level?'),
-      content: const Text('Your progress in this level will be lost.'),
+      content: const Text('Your run will end and this level\'s progress will be lost.'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

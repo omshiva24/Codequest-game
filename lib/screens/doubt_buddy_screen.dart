@@ -6,6 +6,8 @@ import '../models/models.dart';
 import '../services/doubt_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
+import '../widgets/game_ui.dart';
+import '../widgets/scenes.dart';
 
 class _Message {
   const _Message({required this.fromUser, required this.text, this.source});
@@ -86,6 +88,12 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
       _input.clear();
     });
     _scrollToEnd();
+    final newBadges = AppScope.read(context).markAskedDoubt();
+    if (newBadges.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Badge unlocked: ${newBadges.first.title} ${newBadges.first.emoji}'),
+      ));
+    }
     final answer = await service.ask(text, lang: _lang, context: _context);
     // Context is only used for the first question that came with it.
     _context = null;
@@ -114,27 +122,22 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
   @override
   Widget build(BuildContext context) {
     final g = GameColors.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Emoji('🦉', size: 26), SizedBox(width: 8), Text('Doubt Buddy')],
-        ),
-      ),
+    return GameScaffold(
+      scene: SceneKind.menu,
+      title: 'Doubt Buddy',
       body: PageBody(
-        maxWidth: 760,
         child: Column(
           children: [
             SizedBox(
-              height: 56,
+              height: 60,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 children: [
                   _LangChip(label: 'Any language', selected: _lang == null, onTap: () => setState(() => _lang = null)),
                   for (final lang in Lang.values)
                     _LangChip(
-                      label: lang.label,
+                      label: '${lang.emoji} ${lang.label}',
                       selected: _lang == lang,
                       onTap: () => setState(() => _lang = lang),
                     ),
@@ -153,22 +156,37 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
                   }
                   if (_busy) {
                     return Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                                width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 3)),
-                            const SizedBox(width: 12),
-                            Text('Byte is thinking...', style: TextStyle(color: g.textDim)),
-                          ],
-                        ),
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const ByteAvatar(size: 46),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: SpeechBubble(
+                              child: Semantics(
+                                liveRegion: true,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(strokeWidth: 3, color: g.ink),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Text('Byte is thinking...'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }
                   return Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.only(top: 10, left: 50),
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -177,8 +195,6 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
                           ActionChip(
                             label: Text(s),
                             onPressed: () => _send(s),
-                            backgroundColor: g.cardRaised,
-                            side: BorderSide(color: g.border),
                           ),
                       ],
                     ),
@@ -191,7 +207,7 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: TextField(
@@ -203,6 +219,7 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
                         maxLengthEnforcement: MaxLengthEnforcement.enforced,
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _send(),
+                        style: TextStyle(color: g.parchmentText, fontSize: 16),
                         decoration: const InputDecoration(
                           labelText: 'Ask your doubt',
                           hintText: 'e.g. What does i++ mean?',
@@ -210,13 +227,15 @@ class _DoubtBuddyScreenState extends State<DoubtBuddyScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton.filled(
-                      tooltip: 'Send question',
-                      onPressed: _busy ? null : _send,
-                      iconSize: 26,
-                      style: IconButton.styleFrom(minimumSize: const Size(56, 56)),
-                      icon: const Icon(Icons.send_rounded),
+                    const SizedBox(width: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: RoundIconButton(
+                        icon: Icons.send_rounded,
+                        tooltip: 'Send question',
+                        tone: ButtonTone.gold,
+                        onPressed: _busy ? null : _send,
+                      ),
                     ),
                   ],
                 ),
@@ -257,44 +276,50 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final g = GameColors.of(context);
     final user = message.fromUser;
-    return Align(
-      alignment: user ? Alignment.centerRight : Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 620),
-        child: Semantics(
-          liveRegion: announce,
-          label: user ? 'You asked' : 'Byte answered',
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: user ? g.cardRaised : g.card,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(18),
-                topRight: const Radius.circular(18),
-                bottomLeft: Radius.circular(user ? 18 : 4),
-                bottomRight: Radius.circular(user ? 4 : 18),
-              ),
-              border: Border.all(color: user ? g.coin : g.border, width: user ? 2 : 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (user)
-                  SelectableText(message.text, style: const TextStyle(fontSize: 16))
-                else
-                  RichAnswer(message.text),
-                if (message.source != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    message.source == AnswerSource.ai ? 'AI tutor answer - double-check important facts' : 'Offline buddy answer',
-                    style: TextStyle(fontSize: 12, color: g.textDim),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (user)
+          SelectableText(message.text, style: TextStyle(fontSize: 16, color: g.ink))
+        else
+          RichAnswer(message.text),
+        if (message.source != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            message.source == AnswerSource.ai
+                ? 'AI tutor answer - double-check important facts'
+                : 'Offline buddy answer',
+            style: TextStyle(fontSize: 13, color: g.parchmentDim),
+          ),
+        ],
+      ],
+    );
+    return Semantics(
+      liveRegion: announce,
+      label: user ? 'You asked' : 'Byte answered',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: user
+            ? Align(
+                alignment: Alignment.centerRight,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: SpeechBubble(tailLeft: false, color: g.gold, child: content),
+                ),
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ByteAvatar(size: 46, bob: false),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 620),
+                      child: SpeechBubble(child: content),
+                    ),
                   ),
                 ],
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }

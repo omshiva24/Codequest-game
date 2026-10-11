@@ -144,6 +144,7 @@ else:
           '    print("Kid")',
         ],
         explanation: 'First store the age, then check it with if. else catches every other case.',
+        output: 'Adult',
       ),
       PuzzleSpec(
         id: 'py-3-2',
@@ -156,6 +157,7 @@ else:
           '    print("Odd")',
         ],
         explanation: '% gives the remainder. Even numbers have remainder 0 when divided by 2.',
+        output: 'Odd',
       ),
       PuzzleSpec(
         id: 'py-3-3',
@@ -170,6 +172,7 @@ else:
           '    print("C")',
         ],
         explanation: 'Check the highest grade first. elif is only checked when the if above was False.',
+        output: 'B',
       ),
     ],
   ),
@@ -396,6 +399,7 @@ if (t > 35) {
           '}',
         ],
         explanation: 'The condition sits in ( ), each branch sits in { }, and the final } closes the else.',
+        output: 'Pass',
       ),
       PuzzleSpec(
         id: 'c-3-2',
@@ -409,6 +413,7 @@ if (t > 35) {
           '}',
         ],
         explanation: 'n % 2 is the remainder after dividing by 2. Even numbers give 0.',
+        output: 'Even',
       ),
       PuzzleSpec(
         id: 'c-3-3',
@@ -424,6 +429,7 @@ if (t > 35) {
           '}',
         ],
         explanation: 'Checks run from top to bottom, so the biggest limit must be checked first.',
+        output: 'Warm',
       ),
     ],
   ),
@@ -658,6 +664,8 @@ if (score >= 90) {
           '}',
         ],
         explanation: 'Declare the variable, read it with cin, then decide with if / else.',
+        output: 'Can vote',
+        input: '20',
       ),
       PuzzleSpec(
         id: 'cpp-3-2',
@@ -673,6 +681,7 @@ if (score >= 90) {
           '}',
         ],
         explanation: 'The highest medal is checked first; else if only runs when the check above failed.',
+        output: 'Silver',
       ),
     ],
   ),
@@ -901,6 +910,7 @@ if (n > 0) {
           '}',
         ],
         explanation: 'Store the temperature first, then use if / else to pick a message.',
+        output: 'Hot',
       ),
       PuzzleSpec(
         id: 'java-3-2',
@@ -916,6 +926,7 @@ if (n > 0) {
           '}',
         ],
         explanation: 'Two checks cover positive and negative; else handles the only case left: zero.',
+        output: 'Positive',
       ),
     ],
   ),
