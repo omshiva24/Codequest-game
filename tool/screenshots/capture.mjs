@@ -158,20 +158,28 @@ async function tapScrolling(text, opts = {}) {
 
 /** Taps a battle move whose label is NOT one of the right answers. */
 async function tapWrongMove(rightAnswers) {
-  const hit = await page.evaluate((answers) => {
-    for (const el of document.querySelectorAll('flt-semantics, [aria-label]')) {
-      const label = (el.getAttribute('aria-label') || '').trim();
-      if (!/^Move \d: /.test(label)) continue;
-      if (answers.some((a) => label.endsWith(`: ${a}`))) continue;
-      const r = el.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) continue;
-      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const hit = await page.evaluate((answers) => {
+      let best = null;
+      for (const el of document.querySelectorAll('flt-semantics, [role], [aria-label]')) {
+        const label = (el.getAttribute('aria-label') || el.textContent || '').trim();
+        if (!/^Move \d: /.test(label) || /removed/.test(label)) continue;
+        if (answers.some((a) => label.endsWith(`: ${a}`))) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2 || r.bottom < 0 || r.top > innerHeight) continue;
+        const area = r.width * r.height;
+        if (!best || area < best.area) best = { x: r.x + r.width / 2, y: r.y + r.height / 2, area };
+      }
+      return best;
+    }, rightAnswers);
+    if (hit) {
+      await page.mouse.click(hit.x, hit.y);
+      await sleep(250);
+      return;
     }
-    return null;
-  }, rightAnswers);
-  if (!hit) throw new Error('No wrong move found');
-  await page.mouse.click(hit.x, hit.y);
-  await sleep(250);
+    await scroll(400);
+  }
+  throw new Error('No wrong move found');
 }
 
 async function goHome() {
