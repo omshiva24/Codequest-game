@@ -37,6 +37,7 @@ Each language is a **world** with its own animated scene and 5 levels. The 5th l
 - **Stars, XP, player levels and ranks** (Newbie Coder → Code Wizard), plus a **daily streak**.
 - **11 badges** in the **Trophy room**: First steps, Flawless, Combo king, Curious mind, Boss slayer, Polyglot and more.
 - **Big feedback moments:** confetti, popping stars, count-up rewards, screen shake on mistakes and code bolts in battle. Everything turns off with **Reduce motion**.
+- **8-bit sound effects:** coin pings, battle hits, power-ups, a ping per star and victory/defeat jingles. They are made in code by a tiny synthesizer (Web Audio), so there are no audio files to download. Phones also vibrate. Turn sound off in **Settings → Sound**.
 - **Learning built in:** an explanation after every answer, a "Learn from your mistakes" review, a daily "Did you know?" programming fact, and the puzzle console that shows what your code prints.
 
 ### 🦉 Doubt Buddy (doubt solver)
@@ -76,7 +77,7 @@ Screenshots and the demo video are made automatically by [a GitHub Action](.gith
 - **Security headers** on every response ([`vercel.json`](vercel.json)): strict **Content-Security-Policy** (no inline scripts, no third-party scripts), HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy, COOP/CORP.
 - **No third-party CDNs:** the Flutter engine (CanvasKit) and fonts are self-hosted (`--no-web-resources-cdn`, bundled fonts), so the CSP can stay strict.
 - **Untrusted local data is validated:** saved progress is parsed defensively — corrupted or tampered values are clamped or ignored (tested).
-- **Small supply chain:** only 2 runtime packages (`http`, `shared_preferences`, both from the Dart/Flutter teams); the API has **zero** npm dependencies; Dependabot watches updates; the Flutter SDK version is pinned for builds.
+- **Small supply chain:** only 3 runtime packages (`http`, `shared_preferences`, `web` — all from the Dart/Flutter teams); the API has **zero** npm dependencies; Dependabot watches updates; the Flutter SDK version is pinned for builds.
 - Code answers are **never executed** — the game only shows code, so there is no code-execution risk.
 
 See [SECURITY.md](SECURITY.md).
@@ -95,6 +96,7 @@ See [SECURITY.md](SECURITY.md).
   - [`curriculum_test.dart`](test/curriculum_test.dart) — every level/question/puzzle is well-formed (unique ids, valid answers, no duplicate options…)
   - [`game_logic_test.dart`](test/game_logic_test.dart) — runner/battle rules, combos, 50/50 power-up, puzzle rules, hints, stars, XP
   - [`progress_test.dart`](test/progress_test.dart) — unlocking, streaks, badges, coin spending, saving/loading, tampered-data handling
+  - [`sound_test.dart`](test/sound_test.dart) — every sound effect is short and quiet, and playing sounds is safe on every platform
   - [`doubt_service_test.dart`](test/doubt_service_test.dart) — input sanitising, topic matching, AI → offline fallback with a mock server
   - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: runner (keyboard, timer, 50/50), battle, puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
   - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 12 screens, in normal and high-contrast mode
@@ -103,7 +105,7 @@ See [SECURITY.md](SECURITY.md).
 - **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs analyze + tests + web build + Android APK build on every push.
 
 ### 🧹 Code quality
-- Clear structure: `models/` (data types), `data/` (all lessons as plain data), `logic/` (pure, UI-free game rules and badges), `services/` (doubt solver), `screens/`, `widgets/` (game UI kit, painted scenes, effects), `theme/` (design tokens).
+- Clear structure: `models/` (data types), `data/` (all lessons as plain data), `logic/` (pure, UI-free game rules and badges), `services/` (doubt solver, sound effects), `screens/`, `widgets/` (game UI kit, painted scenes, effects), `theme/` (design tokens).
 - A small, consistent game UI kit ([`lib/widgets/game_ui.dart`](lib/widgets/game_ui.dart)): 3D `GameButton`, `ParchmentPanel`, `OutlinedText`, HUD pills. Every screen uses the same pieces, so the look stays consistent and accessible.
 - All scenery is drawn in code with `CustomPainter` ([`lib/widgets/scenes.dart`](lib/widgets/scenes.dart)), so there are no image downloads.
 - Game rules are pure Dart classes, so they are easy to test and reuse.
