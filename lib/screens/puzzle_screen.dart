@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../logic/puzzle_session.dart';
 import '../logic/scoring.dart';

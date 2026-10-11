@@ -3,6 +3,9 @@ import 'package:codequest/services/sound_tones.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Vibration calls go through Flutter's platform channels.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('every sound effect has gentle, valid tones', () {
     const waves = {'square', 'triangle', 'sawtooth', 'sine'};
     for (final sfx in Sfx.values) {
