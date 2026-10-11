@@ -63,7 +63,12 @@ void main() {
   test('round-trips through storage', () async {
     progress
       ..recordResult(levelById('cpp-1')!, stars: 3, correct: 5)
-      ..updateSettings(const AppSettings(highContrast: true, timerMode: TimerMode.off, textScale: 1.3));
+      ..updateSettings(const AppSettings(
+        highContrast: true,
+        timerMode: TimerMode.off,
+        textScale: 1.3,
+        soundOn: false,
+      ));
     await Future<void>.delayed(Duration.zero);
     final loaded = ProgressController(storage: storage, clock: () => now);
     await loaded.load();
@@ -72,6 +77,14 @@ void main() {
     expect(loaded.settings.highContrast, isTrue);
     expect(loaded.settings.timerMode, TimerMode.off);
     expect(loaded.settings.textScale, 1.3);
+    expect(loaded.settings.soundOn, isFalse);
+  });
+
+  test('sound is on by default, also for saves made before the sound setting existed', () {
+    expect(const AppSettings().soundOn, isTrue);
+    expect(AppSettings.fromJson({'highContrast': true}).soundOn, isTrue);
+    expect(AppSettings.fromJson({'soundOn': 'nope'}).soundOn, isTrue);
+    expect(AppSettings.fromJson({'soundOn': false}).soundOn, isFalse);
   });
 
   test('ignores corrupted saved data', () async {
@@ -102,6 +115,63 @@ void main() {
     expect(progress.settings.highContrast, isFalse);
   });
 
+  test('badges unlock as the player progresses', () {
+    final first = progress.recordResult(levelById('py-1')!, stars: 2, correct: 4);
+    expect(first.newAchievements.map((a) => a.id), contains('first_steps'));
+    expect(progress.hasAchievement('flawless'), isFalse);
+
+    final perfect = progress.recordResult(levelById('py-2')!, stars: 3, correct: 5, bestCombo: 5);
+    expect(perfect.newAchievements.map((a) => a.id), containsAll(['flawless', 'combo_5']));
+
+    // Badges are only reported once.
+    final again = progress.recordResult(levelById('py-2')!, stars: 3, correct: 5, bestCombo: 5);
+    expect(again.newAchievements, isEmpty);
+
+    expect(progress.markAskedDoubt().map((a) => a.id), ['curious']);
+    expect(progress.markAskedDoubt(), isEmpty);
+  });
+
+  test('beating a boss and every language unlock more badges', () {
+    for (final id in ['py-1', 'c-1', 'cpp-1', 'java-1']) {
+      progress.recordResult(levelById(id)!, stars: 1, correct: 3);
+    }
+    expect(progress.hasAchievement('polyglot'), isTrue);
+    for (final id in ['py-2', 'py-3', 'py-4', 'py-5']) {
+      progress.recordResult(levelById(id)!, stars: 1, correct: 3);
+    }
+    expect(progress.hasAchievement('boss_slayer'), isTrue);
+    expect(progress.hasAchievement('world_champ'), isTrue);
+    expect(progress.hasAchievement('code_master'), isFalse);
+  });
+
+  test('spending coins only works when the player can afford it', () {
+    expect(progress.spendCoins(15), isFalse);
+    progress.recordResult(levelById('py-1')!, stars: 3, correct: 5);
+    final coins = progress.coins;
+    expect(progress.spendCoins(15), isTrue);
+    expect(progress.coins, coins - 15);
+    expect(progress.spendCoins(100000), isFalse);
+    expect(progress.spendCoins(-5), isFalse);
+    expect(progress.coins, coins - 15);
+  });
+
+  test('badges and combo survive saving, unknown badges are dropped', () async {
+    progress
+      ..recordResult(levelById('py-1')!, stars: 3, correct: 5, bestCombo: 4)
+      ..markAskedDoubt();
+    await Future<void>.delayed(Duration.zero);
+    final saved = jsonDecode(storage.data!) as Map<String, dynamic>;
+    saved['achievements'] = [...(saved['achievements'] as List<dynamic>), 'hacked_badge', 42];
+    storage.data = jsonEncode(saved);
+    final loaded = ProgressController(storage: storage, clock: () => now);
+    await loaded.load();
+    expect(loaded.bestCombo, 4);
+    expect(loaded.hasAchievement('first_steps'), isTrue);
+    expect(loaded.hasAchievement('curious'), isTrue);
+    expect(loaded.hasAchievement('hacked_badge'), isFalse);
+    expect(loaded.achievementCount, progress.achievementCount);
+  });
+
   test('reset clears progress but keeps settings', () {
     progress
       ..updateSettings(const AppSettings(reduceMotion: true))
@@ -110,5 +180,7 @@ void main() {
     expect(progress.totalStars, 0);
     expect(progress.xp, 0);
     expect(progress.settings.reduceMotion, isTrue);
+    expect(progress.achievementCount, 0);
+    expect(progress.bestCombo, 0);
   });
 }

@@ -124,8 +124,35 @@ async function locate(text, { timeout = 15000, exact = false } = {}) {
   throw new Error(`Could not find "${text}" on screen`);
 }
 
+/**
+ * Like locate(), but waits until the element has stopped moving (panels slide
+ * and pop in) and its centre is inside the window, so the click lands on it.
+ */
+async function locateStable(text, opts = {}) {
+  const end = Date.now() + (opts.timeout ?? 15000);
+  let last = null;
+  let inViewSince = 0;
+  while (Date.now() < end) {
+    const p = await locate(text, { ...opts, timeout: Math.max(300, end - Date.now()) });
+    const viewportHeight = await page.evaluate(() => innerHeight);
+    const inView = p.y > 2 && p.y < viewportHeight - 2;
+    if (!inView) {
+      last = null;
+      inViewSince = 0;
+    } else {
+      inViewSince ||= Date.now();
+      // Small idle bobbing is fine; sliding panels move much more than 4px.
+      const settled = last && Math.abs(last.x - p.x) < 4 && Math.abs(last.y - p.y) < 4;
+      if (settled || Date.now() - inViewSince > 2500) return p;
+      last = p;
+    }
+    await sleep(200);
+  }
+  throw new Error(`"${text}" never settled on screen`);
+}
+
 async function tap(text, opts) {
-  const p = await locate(text, opts);
+  const p = await locateStable(text, opts);
   await page.mouse.click(p.x, p.y);
   await sleep(700);
 }
@@ -142,104 +169,208 @@ async function scroll(dy) {
   await sleep(600);
 }
 
+/** Scrolls down until `text` is on screen, then taps it. */
+async function tapScrolling(text, opts = {}) {
+  for (let i = 0; i < 10; i++) {
+    const hit = await locateStable(text, { ...opts, timeout: 1200 }).catch(() => null);
+    if (hit) {
+      await page.mouse.click(hit.x, hit.y);
+      await sleep(700);
+      return;
+    }
+    await scroll(450);
+  }
+  throw new Error(`Could not scroll to "${text}"`);
+}
+
+/** Taps a battle move whose label is NOT one of the right answers. */
+async function tapWrongMove(rightAnswers) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const hit = await page.evaluate((answers) => {
+      let best = null;
+      for (const el of document.querySelectorAll('flt-semantics, [role], [aria-label]')) {
+        const label = (el.getAttribute('aria-label') || el.textContent || '').trim();
+        if (!/^Move \d: /.test(label) || /removed/.test(label)) continue;
+        if (answers.some((a) => label.endsWith(`: ${a}`))) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2 || r.bottom < 0 || r.top > innerHeight) continue;
+        const area = r.width * r.height;
+        if (!best || area < best.area) best = { x: r.x + r.width / 2, y: r.y + r.height / 2, area };
+      }
+      return best;
+    }, rightAnswers);
+    if (hit) {
+      await page.mouse.click(hit.x, hit.y);
+      await sleep(250);
+      return;
+    }
+    await scroll(400);
+  }
+  throw new Error('No wrong move found');
+}
+
+async function goHome() {
+  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
+  await tap('Play', { timeout: 60000, exact: true });
+  await locate('Choose your world');
+  await sleep(800);
+}
+
 // The right answers for the Python world (options are shuffled in game).
 const runnerAnswers = ['print("Hi")', '5', '#', 'HiHiHi', 'Indentation'];
 const battleAnswers = ["<class 'str'>", 'my_score', '15', 'float', 'Hi Om'];
+const puzzleLines = ['age = 20', 'if age >= 18:', 'print("Adult")', 'else:', 'print("Kid")'];
 
 try {
   await page.setViewport({ width: 1280, height: 860, deviceScaleFactor: 1 });
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
-  await locate('Choose your world', { timeout: 60000 });
+  await locate('Play', { timeout: 60000, exact: true });
   await sleep(1500);
   if (FRAMES) {
     recording = true;
     recordLoop();
   }
+  await shot('00-title');
+  await tap('Play', { exact: true });
+  await locate('Choose your world');
+  await sleep(900);
   await shot('01-home');
 
   // World map
-  await tap('Python Jungle');
+  await tap('Python Jungle.');
+  await sleep(600);
   await shot('02-world-map');
 
   // Lesson
   await tap('Level 1: Hello, Python!');
+  await sleep(1400);
   await shot('03-lesson');
 
   // Runner game
-  await tap('Start Code Runner');
-  await sleep(1800);
+  await tapScrolling('Start Code Runner');
+  await sleep(2200);
   await shot('04-runner');
   for (let i = 0; i < runnerAnswers.length; i++) {
     await tap(`: ${runnerAnswers[i]}`, { exact: false });
     await tap('Run through gate');
     if (i === 0) await shot('05-runner-correct');
-    await tap(i === runnerAnswers.length - 1 ? 'See results' : 'Next gate');
+    await tapScrolling(i === runnerAnswers.length - 1 ? 'See results' : 'Next gate');
+    await sleep(600);
   }
-  await sleep(800);
+  await sleep(1800);
   await shot('06-results');
 
-  // Battle level (show one mistake first, then win)
-  await tap('Next: Variables & Types');
-  await tap('Start Bug Battle');
-  await sleep(800);
-  await shot('07-battle');
-  await tap('Move', { exact: false }); // first move button - may be wrong
+  // Battle: hit, then one miss, then win
+  await tapScrolling('Next: Variables & Types');
   await sleep(600);
-  await shot('08-battle-feedback');
-  await tap('Next move').catch(() => tap('See results'));
+  await tapScrolling('Start Bug Battle');
+  await sleep(1200);
+  await shot('07-battle');
+  let attacked = false;
+  for (const a of battleAnswers) {
+    const hit = await locate(`: ${a}`, { timeout: 300 }).catch(() => null);
+    if (hit) {
+      await page.mouse.click(hit.x, hit.y);
+      attacked = true;
+      break;
+    }
+  }
+  if (attacked) {
+    await sleep(180);
+    await page.screenshot({ path: join(OUT, '08-battle-attack.png') });
+    console.log('saved 08-battle-attack');
+    await sleep(1200);
+    await tapScrolling('Next move');
+    await sleep(700);
+    await tapWrongMove(battleAnswers);
+    await sleep(900);
+    await shot('09-battle-miss');
+    await tapScrolling('Next move');
+  }
   for (let guard = 0; guard < 12; guard++) {
     if (await locate('See results', { timeout: 400 }).then(() => true).catch(() => false)) break;
     let hit = null;
     for (const a of battleAnswers) {
-      hit = await locate(`Move`, { timeout: 200 })
-        .then(() => locate(`: ${a}`, { timeout: 200 }))
-        .catch(() => null);
+      hit = await locate(`: ${a}`, { timeout: 200 }).catch(() => null);
       if (hit) break;
     }
-    if (!hit) break;
+    if (!hit) {
+      await scroll(400);
+      continue;
+    }
     await page.mouse.click(hit.x, hit.y);
-    await sleep(700);
-    await tap('Next move', { timeout: 1500 }).catch(() => {});
+    await sleep(900);
+    await tapScrolling('Next move', { timeout: 1500 }).catch(() => {});
   }
-  await tap('See results').catch(() => {});
-  await sleep(800);
+  await tapScrolling('See results').catch(() => {});
+  await sleep(1500);
 
-  // Puzzle level
-  await tap('Next: If / Else Decisions').catch(() => {});
-  await tap('Start Block Builder').catch(() => {});
+  // Puzzle: build the program, then run it
+  await tapScrolling('Next: If / Else Decisions');
+  await sleep(600);
+  await tapScrolling('Start Block Builder');
   await sleep(800);
-  for (const line of ['age = 20', 'if age >= 18:', 'print("Adult")', 'else:']) {
-    await tap(`Add block: ${line}`).catch(() => {});
+  for (const [i, line] of puzzleLines.entries()) {
+    await tapScrolling(`Add block: ${line}`);
+    if (i === 2) await shot('10-puzzle');
   }
-  await shot('09-puzzle');
-  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0' });
-  await locate('Choose your world', { timeout: 60000 });
+  await tapScrolling('Run code');
+  await sleep(1500);
+  await shot('11-puzzle-run');
+
+  // Trophy room
+  await goHome();
+  await tap('Trophy room');
+  await sleep(800);
+  await shot('12-trophies');
 
   // Doubt Buddy
+  await goHome();
   await tap('Doubt Buddy');
+  await sleep(600);
   await tap('What is a pointer in C?');
-  await sleep(1200);
-  await shot('10-doubt-buddy');
+  await sleep(1600);
+  await shot('13-doubt-buddy');
 
-  // Settings with high contrast
-  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0' });
-  await locate('Choose your world', { timeout: 60000 });
+  // High-contrast mode
+  await goHome();
   await tap('Settings and accessibility');
   await tap('High contrast');
-  await sleep(600);
-  await shot('11-settings-high-contrast');
+  await sleep(800);
+  await shot('14-high-contrast');
   await tap('High contrast');
 
-  // Mobile view
+  // Phone size
   recording = false;
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0' });
-  await locate('Choose your world', { timeout: 60000 });
-  await sleep(1200);
-  await shot('12-mobile-home');
+  await locate('Play', { timeout: 60000, exact: true });
+  await sleep(1500);
+  await shot('15-mobile-title');
+  await tap('Play', { exact: true });
+  await locate('Choose your world');
+  await sleep(1000);
+  await shot('16-mobile-home');
+  await tap('C Caves.');
+  await sleep(900);
+  await shot('17-mobile-map');
 } catch (err) {
   console.error('Capture failed:', err.message);
   await page.screenshot({ path: join(OUT, 'zz-error.png') }).catch(() => {});
+  // Print what a screen reader would see, to make failures easy to debug.
+  const labels = await page
+    .evaluate(() =>
+      [...document.querySelectorAll('[aria-label], flt-semantics')]
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          const label = (el.getAttribute('aria-label') || '').trim();
+          return label ? `${label.slice(0, 70)} @${Math.round(r.x)},${Math.round(r.y)} ${Math.round(r.width)}x${Math.round(r.height)}` : '';
+        })
+        .filter(Boolean)
+        .slice(0, 60),
+    )
+    .catch(() => []);
+  console.error('On screen:\n  ' + labels.join('\n  '));
   process.exitCode = 1;
 } finally {
   recording = false;

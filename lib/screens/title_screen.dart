@@ -1,0 +1,200 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import '../models/models.dart';
+import '../theme/app_theme.dart';
+import '../widgets/common.dart';
+import '../widgets/game_ui.dart';
+import '../widgets/scenes.dart';
+import 'home_screen.dart';
+import 'navigation.dart';
+
+/// The "press start" screen: bouncing logo, Byte the owl and a big Play button.
+class TitleScreen extends StatelessWidget {
+  const TitleScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GameColors.of(context);
+    return Stack(
+      children: [
+        const Positioned.fill(child: SceneBackground(kind: SceneKind.menu)),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _Mascot(),
+                      const SizedBox(height: 18),
+                      const _BouncingLogo(),
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: g.ink.withValues(alpha: g.highContrast ? 1 : 0.7),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          'Learn to code by playing. Run, battle and build your way '
+                          'through four worlds.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: g.onNight, fontSize: 17, height: 1.4),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [for (final lang in Lang.values) _LangBadge(lang: lang)],
+                      ),
+                      const SizedBox(height: 34),
+                      SizedBox(
+                        width: 280,
+                        child: GameButton(
+                          autofocus: true,
+                          label: 'Play',
+                          icon: Icons.play_arrow_rounded,
+                          size: GameButtonSize.large,
+                          expand: true,
+                          onPressed: () => Navigator.of(context)
+                              .pushReplacement(gameRoute<void>(const HomeScreen())),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Your progress is saved on this device.',
+                        style: TextStyle(color: g.onNightDim, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Mascot extends StatelessWidget {
+  const _Mascot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const ByteAvatar(size: 96),
+        const SizedBox(width: 6),
+        Flexible(
+          child: SpeechBubble(
+            child: Text(
+              "Hoot! I'm Byte. Ready for a coding adventure?",
+              style: displayStyle(19, color: GameColors.of(context).ink, height: 1.25),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LangBadge extends StatelessWidget {
+  const _LangBadge({required this.lang});
+
+  final Lang lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GameColors.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 4, 14, 4),
+      decoration: BoxDecoration(
+        color: g.highContrast ? Colors.black : lang.color,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: g.highContrast ? Colors.white : g.ink, width: 2.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Emoji(lang.emoji, size: 18),
+          const SizedBox(width: 6),
+          Text(lang.label, style: displayStyle(18, color: g.highContrast ? Colors.white : g.ink)),
+        ],
+      ),
+    );
+  }
+}
+
+/// "CodeQuest" with each letter riding a gentle wave.
+class _BouncingLogo extends StatefulWidget {
+  const _BouncingLogo();
+
+  @override
+  State<_BouncingLogo> createState() => _BouncingLogoState();
+}
+
+class _BouncingLogoState extends State<_BouncingLogo> with SingleTickerProviderStateMixin {
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 2200));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _c.stop();
+    } else if (!_c.isAnimating) {
+      _c.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GameColors.of(context);
+    final width = MediaQuery.sizeOf(context).width;
+    final size = width < 420 ? 58.0 : 84.0;
+    const word = 'CodeQuest';
+    return Semantics(
+      header: true,
+      label: 'CodeQuest',
+      child: ExcludeSemantics(
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, _) => FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < word.length; i++)
+                Transform.translate(
+                  offset: Offset(0, math.sin((_c.value * 2 * math.pi) - i * 0.6) * size * 0.08),
+                  child: OutlinedText(
+                    word[i],
+                    size: size,
+                    color: i < 4 ? g.gold : g.onNight,
+                  ),
+                ),
+            ],
+          ),
+          ),
+        ),
+      ),
+    );
+  }
+}

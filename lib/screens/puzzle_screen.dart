@@ -5,11 +5,16 @@ import 'package:flutter/material.dart';
 import '../logic/puzzle_session.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
+import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
+import '../widgets/effects.dart';
+import '../widgets/game_ui.dart';
+import '../widgets/scenes.dart';
 import 'navigation.dart';
 
-/// Block Builder: tap code blocks in the right order to build a program.
+/// Block Builder: snap code blocks into the editor in the right order, then
+/// run the program and watch its output appear in the console.
 class PuzzleScreen extends StatefulWidget {
   const PuzzleScreen({super.key, required this.level, this.random});
 
@@ -20,12 +25,22 @@ class PuzzleScreen extends StatefulWidget {
   State<PuzzleScreen> createState() => _PuzzleScreenState();
 }
 
+/// Colour of a code block, by what the line does.
+ButtonTone blockTone(String line) {
+  final t = line.trim();
+  if (RegExp(r'^(if|elif|else|for|while|do|switch|\})').hasMatch(t)) return ButtonTone.lilac;
+  if (RegExp(r'print|cout|System\.out').hasMatch(t)) return ButtonTone.mint;
+  return ButtonTone.sky;
+}
+
 class _PuzzleScreenState extends State<PuzzleScreen> {
   late final PuzzleSession _session = PuzzleSession(widget.level.puzzles, random: widget.random);
   final GlobalKey _feedbackKey = GlobalKey();
 
   PuzzleCheck? _check;
   String? _message;
+  int _shakeTick = 0;
+  int _winTick = 0;
 
   void _place(int id) => setState(() {
         _session.place(id);
@@ -51,24 +66,30 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
         _message = 'Hint used: the first wrong block was fixed for you.';
       });
 
-  void _checkAnswer() {
+  void _run() {
     if (!_session.readyToCheck) return;
     setState(() {
       _check = _session.check();
       if (_check!.solved) {
         _message = null;
+        _winTick++;
+        SoundFx.play(Sfx.correct);
       } else {
         final wrong = _check!.lineCorrect.where((ok) => !ok).length;
+        _shakeTick++;
+        SoundFx.play(Sfx.wrong);
         _message = _session.lives <= 0
             ? 'Out of hearts! $wrong block${wrong == 1 ? ' is' : 's are'} in the wrong place.'
-            : 'Not quite: $wrong block${wrong == 1 ? ' is' : 's are'} in the wrong place. '
-                'Tap a block to take it back. You lost a heart.';
+            : 'Bug found: $wrong block${wrong == 1 ? ' is' : 's are'} in the wrong place. '
+                'Tap a red line to take it back. You lost a heart.';
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _feedbackKey.currentContext;
       if (ctx != null && ctx.mounted) {
-        Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 250));
+        Scrollable.ensureVisible(ctx,
+            duration: const Duration(milliseconds: 250),
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
       }
     });
   }
@@ -113,212 +134,268 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   Widget build(BuildContext context) {
     final g = GameColors.of(context);
     final spec = _session.current;
-    final color = widget.level.lang.color;
     final check = _check;
     final solved = _session.currentSolved;
+    final lang = widget.level.lang;
 
     return QuitGuard(
       active: !_session.isOver,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.level.title),
-          actions: [
-            HeartsBar(lives: _session.lives, max: _session.maxLives),
-            const SizedBox(width: 12),
-          ],
-        ),
-        body: PageBody(
-          maxWidth: 760,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              Text('Puzzle ${_session.index + 1} of ${_session.puzzles.length}',
-                  style: TextStyle(color: g.textDim, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      const Emoji('🎯', size: 28),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(spec.goal,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, height: 1.35)),
-                        ),
-                      ),
-                    ],
+      child: Stack(
+        children: [
+          Positioned.fill(child: SceneBackground(kind: sceneFor(lang))),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: GameTopBar(
+              title: widget.level.title,
+              actions: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: g.ink.withValues(alpha: g.highContrast ? 1 : 0.82),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: g.highContrast ? Colors.white : g.ink, width: 2.5),
                   ),
+                  child: HeartsBar(lives: _session.lives, max: _session.maxLives, size: 22),
                 ),
-              ),
-              const SizedBox(height: 14),
-              Semantics(
-                header: true,
-                child: Text('Your program',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: g.coin)),
-              ),
-              const SizedBox(height: 6),
-              Container(
-                constraints: const BoxConstraints(minHeight: 120),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: g.codeBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: solved ? g.good : g.border, width: 2),
-                ),
-                child: _session.placed.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text('Tap the blocks below to add them here, in order.',
-                            style: TextStyle(color: g.textDim)),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+              ],
+            ),
+            body: PageBody(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: HudPill(
+                      leading: const Emoji('🧩', size: 20),
+                      text: 'Puzzle ${_session.index + 1} of ${_session.puzzles.length}',
+                      semanticLabel: 'Puzzle ${_session.index + 1} of ${_session.puzzles.length}',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ParchmentPanel(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        const Emoji('🎯', size: 30),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Semantics(
+                            header: true,
+                            child: Text(spec.goal, style: displayStyle(21, color: g.ink, height: 1.3)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Shake(
+                    trigger: _shakeTick,
+                    child: _Editor(
+                      fileName: lang.fileName,
+                      placed: _session.placed,
+                      check: check,
+                      locked: solved,
+                      onRemove: _unplace,
+                    ),
+                  ),
+                  if (check != null) ...[
+                    const SizedBox(height: 10),
+                    _Console(spec: spec, solved: check.solved, fileName: lang.fileName),
+                  ],
+                  const SizedBox(height: 14),
+                  if (!solved) ...[
+                    ParchmentPanel(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          for (var i = 0; i < _session.placed.length; i++)
-                            _PlacedLine(
-                              number: i + 1,
-                              token: _session.placed[i],
-                              status: check == null || i >= check.lineCorrect.length
-                                  ? null
-                                  : check.lineCorrect[i],
-                              locked: solved,
-                              onTap: () => _unplace(_session.placed[i].id),
+                          const PanelBanner(text: 'Code blocks', tone: ButtonTone.lilac, icon: Icons.extension_rounded),
+                          const SizedBox(height: 10),
+                          if (_session.pool.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text('All blocks placed. Press Run code!',
+                                  style: TextStyle(color: g.parchmentDim, fontSize: 16)),
+                            )
+                          else
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 2,
+                              children: [
+                                for (final token in _session.pool)
+                                  GameButton(
+                                    key: ValueKey('block-${token.id}'),
+                                    tone: blockTone(token.text),
+                                    size: GameButtonSize.small,
+                                    semanticLabel: 'Add block: ${token.text.trim()}'
+                                        '${token.text.startsWith(' ') ? ' (indented)' : ''}',
+                                    onPressed: () => _place(token.id),
+                                    child: Text(
+                                      token.text,
+                                      style: TextStyle(
+                                        fontFamily: codeFont,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: g.ink,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                         ],
                       ),
-              ),
-              const SizedBox(height: 14),
-              if (!solved) ...[
-                Semantics(
-                  header: true,
-                  child: Text('Code blocks',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: g.coin)),
-                ),
-                const SizedBox(height: 6),
-                if (_session.pool.isEmpty)
-                  Text('All blocks placed. Press Check!', style: TextStyle(color: g.textDim))
-                else
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final token in _session.pool)
-                        _Block(
-                          key: ValueKey('block-${token.id}'),
-                          token: token,
-                          color: color,
-                          onTap: () => _place(token.id),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 4,
+                      children: [
+                        GameButton(
+                          tone: ButtonTone.mint,
+                          onPressed: _session.readyToCheck && !_session.isOver ? _run : null,
+                          icon: Icons.play_arrow_rounded,
+                          label: 'Run code',
                         ),
-                    ],
-                  ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: _session.readyToCheck && !_session.isOver ? _checkAnswer : null,
-                      icon: const Icon(Icons.play_circle_fill_rounded),
-                      label: const Text('Check'),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: _session.placed.isEmpty ? null : _clear,
-                      icon: const Icon(Icons.undo_rounded),
-                      label: const Text('Clear'),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: _session.isOver ? null : _hint,
-                      icon: const Icon(Icons.lightbulb_rounded),
-                      label: const Text('Hint'),
+                        GameButton(
+                          tone: ButtonTone.parchment,
+                          onPressed: _session.placed.isEmpty ? null : _clear,
+                          icon: Icons.undo_rounded,
+                          label: 'Clear',
+                        ),
+                        GameButton(
+                          tone: ButtonTone.gold,
+                          onPressed: _session.isOver ? null : _hint,
+                          icon: Icons.lightbulb_rounded,
+                          label: 'Hint',
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
-              if (_message != null) ...[
-                const SizedBox(height: 12),
-                Semantics(
-                  liveRegion: true,
-                  child: Container(
-                    key: _feedbackKey,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: g.cardRaised,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: check != null ? g.bad : g.coin, width: 2),
+                  if (_message != null) ...[
+                    const SizedBox(height: 10),
+                    Semantics(
+                      liveRegion: true,
+                      container: true,
+                      child: ParchmentPanel(
+                        key: _feedbackKey,
+                        borderColor: check != null ? g.coralLip : null,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Emoji(check != null ? '🐞' : '💡', size: 24),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(_message!, style: const TextStyle(fontSize: 16))),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Text(_message!, style: const TextStyle(fontSize: 16)),
-                  ),
-                ),
-                if (_session.lives <= 0) ...[
-                  const SizedBox(height: 12),
-                  FilledButton(onPressed: _finish, child: const Text('See results')),
+                    if (_session.lives <= 0) ...[
+                      const SizedBox(height: 6),
+                      GameButton(onPressed: _finish, label: 'See results', icon: Icons.arrow_forward_rounded),
+                    ],
+                  ],
+                  if (solved) ...[
+                    const SizedBox(height: 4),
+                    FeedbackPanel(
+                      key: _feedbackKey,
+                      correct: true,
+                      headline: 'Program works!',
+                      explanation: spec.explanation,
+                      continueLabel: _session.isOver ? 'See results' : 'Next puzzle',
+                      onContinue: _continue,
+                    ),
+                  ],
                 ],
-              ],
-              if (solved) ...[
-                const SizedBox(height: 4),
-                FeedbackPanel(
-                  key: _feedbackKey,
-                  correct: true,
-                  headline: 'Program works!',
-                  explanation: spec.explanation,
-                  continueLabel: _session.isOver ? 'See results' : 'Next puzzle',
-                  onContinue: _continue,
-                ),
-              ],
-            ],
+              ),
+            ),
           ),
-        ),
+          Positioned.fill(child: ConfettiBurst(trigger: _winTick)),
+        ],
       ),
     );
   }
 }
 
-class _Block extends StatelessWidget {
-  const _Block({super.key, required this.token, required this.color, required this.onTap});
+class _Editor extends StatelessWidget {
+  const _Editor({
+    required this.fileName,
+    required this.placed,
+    required this.check,
+    required this.locked,
+    required this.onRemove,
+  });
 
-  final PuzzleToken token;
-  final Color color;
-  final VoidCallback onTap;
+  final String fileName;
+  final List<PuzzleToken> placed;
+  final PuzzleCheck? check;
+  final bool locked;
+  final ValueChanged<int> onRemove;
 
   @override
   Widget build(BuildContext context) {
     final g = GameColors.of(context);
-    return Semantics(
-      button: true,
-      label: 'Add block: ${token.text.trim()}'
-          '${token.text.startsWith(' ') ? ' (indented)' : ''}',
-      excludeSemantics: true,
-      onTap: onTap,
-      child: Material(
-        color: g.cardRaised,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: color, width: 2),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48, minWidth: 56),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Text(
-                token.text,
-                style: const TextStyle(fontFamily: codeFont, fontSize: 15, color: Colors.white),
-              ),
+    final c = check;
+    return Container(
+      decoration: BoxDecoration(
+        color: g.codeBackground,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: locked ? g.mint : (g.highContrast ? Colors.white : g.ink), width: g.outlineWidth + 0.5),
+        boxShadow: [BoxShadow(color: g.ink, offset: const Offset(0, 6))],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            color: g.codeBar,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                for (final dot in const [Color(0xFFFF6B7F), Color(0xFFFFC93C), Color(0xFF3DDC84)])
+                  Container(
+                    width: 12,
+                    height: 12,
+                    margin: const EdgeInsets.only(right: 6),
+                    decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                  ),
+                const SizedBox(width: 8),
+                Text(fileName, style: TextStyle(fontFamily: codeFont, fontSize: 14, color: g.codeText)),
+                const Spacer(),
+                Text('${placed.length} line${placed.length == 1 ? '' : 's'}',
+                    style: TextStyle(fontFamily: codeFont, fontSize: 13, color: g.codeDim)),
+              ],
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(6, 8, 8, 10),
+            child: placed.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Text('Tap the blocks below to add them here, in order.',
+                        style: TextStyle(color: g.codeDim, fontSize: 15)),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < placed.length; i++)
+                        _Line(
+                          number: i + 1,
+                          token: placed[i],
+                          status: c == null || i >= c.lineCorrect.length ? null : c.lineCorrect[i],
+                          locked: locked,
+                          onTap: () => onRemove(placed[i].id),
+                        ),
+                    ],
+                  ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _PlacedLine extends StatelessWidget {
-  const _PlacedLine({
+class _Line extends StatelessWidget {
+  const _Line({
     required this.number,
     required this.token,
     required this.status,
@@ -338,6 +415,11 @@ class _PlacedLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final g = GameColors.of(context);
     final statusText = status == null ? '' : (status! ? ', correct place' : ', wrong place');
+    final stripe = switch (blockTone(token.text)) {
+      ButtonTone.lilac => g.lilac,
+      ButtonTone.mint => g.mint,
+      _ => g.sky,
+    };
     return Semantics(
       button: !locked,
       label: 'Line $number: ${token.text.trim()}$statusText${locked ? '' : '. Tap to remove'}',
@@ -346,26 +428,71 @@ class _PlacedLine extends StatelessWidget {
       child: InkWell(
         onTap: locked ? null : onTap,
         borderRadius: BorderRadius.circular(8),
-        child: ConstrainedBox(
+        child: Container(
           constraints: const BoxConstraints(minHeight: 48),
+          margin: const EdgeInsets.symmetric(vertical: 2),
+          decoration: BoxDecoration(
+            color: status == false ? g.coral.withValues(alpha: 0.22) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Row(
             children: [
               SizedBox(
-                width: 28,
+                width: 30,
                 child: Text('$number',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontFamily: codeFont, color: g.textDim)),
+                    textAlign: TextAlign.right, style: TextStyle(fontFamily: codeFont, color: g.codeDim)),
               ),
+              const SizedBox(width: 8),
+              Container(width: 4, height: 30, color: stripe),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  token.text,
-                  style: TextStyle(fontFamily: codeFont, fontSize: 15, color: g.codeText),
-                ),
+                child: Text(token.text, style: TextStyle(fontFamily: codeFont, fontSize: 15, color: g.codeText)),
               ),
               if (status != null)
                 Icon(status! ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                    color: status! ? g.good : g.bad, size: 22),
+                    color: status! ? g.mint : g.coral, size: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A tiny terminal that "runs" the program.
+class _Console extends StatelessWidget {
+  const _Console({required this.spec, required this.solved, required this.fileName});
+
+  final PuzzleSpec spec;
+  final bool solved;
+  final String fileName;
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GameColors.of(context);
+    const base = TextStyle(fontFamily: codeFont, fontSize: 15, height: 1.5);
+    return Semantics(
+      container: true,
+      label: solved ? 'Program output: ${spec.output}' : 'Program has a bug',
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: g.highContrast ? Colors.white : g.ink, width: g.outlineWidth),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('\$ run $fileName', style: base.copyWith(color: const Color(0xFFBBA8DD))),
+              if (spec.input != null && solved)
+                Text('> ${spec.input}   (you typed this)', style: base.copyWith(color: const Color(0xFF9BDCFF))),
+              if (solved)
+                Typewriter(spec.output, style: base.copyWith(color: const Color(0xFF3DDC84), fontWeight: FontWeight.w700), charMs: 60)
+              else
+                Text('Error: the program ran in the wrong order.',
+                    style: base.copyWith(color: const Color(0xFFFF8A9A), fontWeight: FontWeight.w700)),
             ],
           ),
         ),
