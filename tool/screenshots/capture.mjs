@@ -163,8 +163,8 @@ async function shot(name) {
   console.log('saved', name);
 }
 
-async function scroll(dy) {
-  await page.mouse.move(640, 500);
+async function scroll(dy, x = 640) {
+  await page.mouse.move(x, 500);
   await page.mouse.wheel({ deltaY: dy });
   await sleep(600);
 }
@@ -178,7 +178,8 @@ async function tapScrolling(text, opts = {}) {
       await sleep(700);
       return;
     }
-    await scroll(450);
+    // Wide screens have two scrolling columns; try both.
+    await scroll(450, i % 2 === 0 ? 640 : 1000);
   }
   throw new Error(`Could not scroll to "${text}"`);
 }
@@ -217,7 +218,6 @@ async function goHome() {
 }
 
 // The right answers for the Python world (options are shuffled in game).
-const runnerAnswers = ['print("Hi")', '5', '#', 'HiHiHi', 'Indentation'];
 const battleAnswers = ["<class 'str'>", 'my_score', '15', 'float', 'Hi Om'];
 const puzzleLines = ['age = 20', 'if age >= 18:', 'print("Adult")', 'else:', 'print("Kid")'];
 
@@ -246,17 +246,47 @@ try {
   await sleep(1400);
   await shot('03-lesson');
 
-  // Runner game
-  await tapScrolling('Start Code Runner');
-  await sleep(2200);
-  await shot('04-runner');
-  for (let i = 0; i < runnerAnswers.length; i++) {
-    await tap(`: ${runnerAnswers[i]}`, { exact: false });
-    await tap('Run through gate');
-    if (i === 0) await shot('05-runner-correct');
-    await tapScrolling(i === runnerAnswers.length - 1 ? 'See results' : 'Next gate');
-    await sleep(600);
-  }
+  // World Builder: your code builds the world.
+  await tapScrolling('Start World Builder');
+  await sleep(2000);
+  await shot('04-builder');
+
+  // 1. The guard wants the password: print it as a string.
+  await tap('Put "HELLO" in the blank');
+  await tap('Run code');
+  await sleep(500);
+  await shot('05-builder-password');
+  await tapScrolling('Next challenge', { timeout: 8000 });
+  await sleep(1200);
+
+  // 2. Jump: a variable sets the height. Catch Byte mid-air.
+  await tap('Put 2 in the blank');
+  await tap('Run code');
+  await sleep(1000);
+  await shot('05b-builder-jump');
+  await tapScrolling('Next challenge', { timeout: 8000 });
+  await sleep(1200);
+
+  // 3. Bridge: a bug on purpose - one block short - then the fix.
+  await tap('Put 2 in the blank');
+  await tap('Run code');
+  await sleep(1900);
+  await shot('05c-builder-fall');
+  await locate('Try again', { timeout: 8000 });
+  await sleep(600);
+  await shot('05d-builder-bug');
+  await tapScrolling('Try again');
+  await tap('Put 3 in the blank');
+  await tap('Run code');
+  await sleep(1300);
+  await shot('05e-builder-bridge');
+  await tapScrolling('Next challenge', { timeout: 8000 });
+  await sleep(1200);
+
+  // 4. Maths in a variable: ? - 1 = 3.
+  await tap('Put 4 in the blank');
+  await tap('Run code');
+  await tapScrolling('See results', { timeout: 8000 });
   await sleep(1800);
   await shot('06-results');
 
