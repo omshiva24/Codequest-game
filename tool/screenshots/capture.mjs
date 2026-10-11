@@ -131,12 +131,21 @@ async function locate(text, { timeout = 15000, exact = false } = {}) {
 async function locateStable(text, opts = {}) {
   const end = Date.now() + (opts.timeout ?? 15000);
   let last = null;
+  let inViewSince = 0;
   while (Date.now() < end) {
     const p = await locate(text, { ...opts, timeout: Math.max(300, end - Date.now()) });
     const viewportHeight = await page.evaluate(() => innerHeight);
     const inView = p.y > 2 && p.y < viewportHeight - 2;
-    if (inView && last && Math.abs(last.x - p.x) < 1 && Math.abs(last.y - p.y) < 1) return p;
-    last = inView ? p : null;
+    if (!inView) {
+      last = null;
+      inViewSince = 0;
+    } else {
+      inViewSince ||= Date.now();
+      // Small idle bobbing is fine; sliding panels move much more than 4px.
+      const settled = last && Math.abs(last.x - p.x) < 4 && Math.abs(last.y - p.y) < 4;
+      if (settled || Date.now() - inViewSince > 2500) return p;
+      last = p;
+    }
     await sleep(200);
   }
   throw new Error(`"${text}" never settled on screen`);
