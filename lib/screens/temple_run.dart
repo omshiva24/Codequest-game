@@ -394,11 +394,7 @@ class _TempleRunState extends State<TempleRun> with SingleTickerProviderStateMix
     _done = true;
     if (widget.demo) {
       // A demo run saves nothing; it ends back on the lesson.
-      final messenger = ScaffoldMessenger.of(context);
-      openLesson(context, widget.level, replace: true);
-      messenger.showSnackBar(
-        const SnackBar(content: Text("That was Byte's demo run. Now it's your turn!")),
-      );
+      openLesson(context, widget.level, replace: true, afterDemo: true);
       return;
     }
     final s = _session;
