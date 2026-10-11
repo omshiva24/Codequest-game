@@ -2,17 +2,26 @@ import 'package:flutter/material.dart';
 
 /// The four programming languages, each shown as a game "world".
 enum Lang {
-  python('Python', 'Python Jungle', '🐍', Color(0xFF2ECC71), 'A friendly jungle where code reads almost like English.'),
-  c('C', 'C Caves', '⛏️', Color(0xFF4FA3FF), 'Deep caves where you learn how computers really work.'),
-  cpp('C++', 'C++ Castle', '🏰', Color(0xFFC08BFF), 'A castle of classes, objects and super-fast code.'),
-  java('Java', 'Java Volcano', '🌋', Color(0xFFFF8A3D), 'A hot volcano powered by classes and methods.');
+  python('Python', 'Python Jungle', '🐍', Color(0xFF2FD38A), 'main.py',
+      'A friendly jungle where code reads almost like English.'),
+  c('C', 'C Caves', '💎', Color(0xFF5BC0FF), 'main.c',
+      'Deep crystal caves where you learn how computers really work.'),
+  cpp('C++', 'C++ Castle', '🏰', Color(0xFFB98CFF), 'main.cpp',
+      'A starry castle of classes, objects and super-fast code.'),
+  java('Java', 'Java Volcano', '🌋', Color(0xFFFF8A4C), 'Main.java',
+      'A rumbling volcano powered by classes and methods.');
 
-  const Lang(this.label, this.worldName, this.emoji, this.color, this.tagline);
+  const Lang(this.label, this.worldName, this.emoji, this.color, this.fileName, this.tagline);
 
   final String label;
   final String worldName;
   final String emoji;
+
+  /// Bright accent colour of the world (used for buttons and level nodes).
   final Color color;
+
+  /// File name shown in the puzzle code editor.
+  final String fileName;
   final String tagline;
 }
 
@@ -21,19 +30,21 @@ enum LevelKind {
   runner(
     'Code Runner',
     Icons.directions_run_rounded,
-    'Switch lanes and run through the gate with the right answer. '
-        'Use the lane buttons, arrow keys, or keys 1-3. Press Space or "Go" to dash early.',
+    'Answers are gates on the track. Move to the right lane and dash through it '
+        'before the gates reach you. Use the arrow buttons, the arrow keys or keys 1-3, '
+        'and Space to dash. Stuck? Spend coins on 50/50 to remove a wrong gate.',
   ),
   battle(
     'Bug Battle',
     Icons.bug_report_rounded,
-    'A bug monster attacks! Pick the right move (keys 1-4) to hit it. '
-        'Wrong answers come back later so you can try again.',
+    'A bug monster attacks! Pick the right move (keys 1-4) to hit it. Answer '
+        'correctly in a row to build a combo. Missed questions come back, so you can still win.',
   ),
   puzzle(
     'Block Builder',
     Icons.extension_rounded,
-    'Tap the code blocks in the right order to build a working program, then press Check.',
+    'Tap the code blocks in the right order to build the program, then press '
+        'Run code to see what it prints.',
   );
 
   const LevelKind(this.label, this.icon, this.howToPlay);
@@ -77,6 +88,8 @@ class PuzzleSpec {
     required this.goal,
     required this.lines,
     required this.explanation,
+    required this.output,
+    this.input,
   });
 
   final String id;
@@ -85,6 +98,12 @@ class PuzzleSpec {
   /// The program, line by line, in the correct order.
   final List<String> lines;
   final String explanation;
+
+  /// What the finished program prints - shown in the game console.
+  final String output;
+
+  /// What the user types while the program runs, if anything.
+  final String? input;
 }
 
 /// The short lesson shown before each level.
