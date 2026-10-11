@@ -63,7 +63,12 @@ void main() {
   test('round-trips through storage', () async {
     progress
       ..recordResult(levelById('cpp-1')!, stars: 3, correct: 5)
-      ..updateSettings(const AppSettings(highContrast: true, timerMode: TimerMode.off, textScale: 1.3));
+      ..updateSettings(const AppSettings(
+        highContrast: true,
+        timerMode: TimerMode.off,
+        textScale: 1.3,
+        soundOn: false,
+      ));
     await Future<void>.delayed(Duration.zero);
     final loaded = ProgressController(storage: storage, clock: () => now);
     await loaded.load();
@@ -72,6 +77,14 @@ void main() {
     expect(loaded.settings.highContrast, isTrue);
     expect(loaded.settings.timerMode, TimerMode.off);
     expect(loaded.settings.textScale, 1.3);
+    expect(loaded.settings.soundOn, isFalse);
+  });
+
+  test('sound is on by default, also for saves made before the sound setting existed', () {
+    expect(const AppSettings().soundOn, isTrue);
+    expect(AppSettings.fromJson({'highContrast': true}).soundOn, isTrue);
+    expect(AppSettings.fromJson({'soundOn': 'nope'}).soundOn, isTrue);
+    expect(AppSettings.fromJson({'soundOn': false}).soundOn, isFalse);
   });
 
   test('ignores corrupted saved data', () async {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../logic/puzzle_session.dart';
 import '../logic/scoring.dart';
 import '../models/models.dart';
+import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/effects.dart';
@@ -73,11 +74,11 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
       if (_check!.solved) {
         _message = null;
         _winTick++;
-        HapticFeedback.lightImpact();
+        SoundFx.play(Sfx.correct);
       } else {
         final wrong = _check!.lineCorrect.where((ok) => !ok).length;
         _shakeTick++;
-        HapticFeedback.heavyImpact();
+        SoundFx.play(Sfx.wrong);
         _message = _session.lives <= 0
             ? 'Out of hearts! $wrong block${wrong == 1 ? ' is' : 's are'} in the wrong place.'
             : 'Bug found: $wrong block${wrong == 1 ? ' is' : 's are'} in the wrong place. '

@@ -11,6 +11,7 @@ import 'package:codequest/screens/puzzle_screen.dart';
 import 'package:codequest/screens/runner_screen.dart';
 import 'package:codequest/screens/settings_screen.dart';
 import 'package:codequest/screens/title_screen.dart';
+import 'package:codequest/services/sound.dart';
 import 'package:codequest/services/doubt_service.dart';
 import 'package:codequest/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -279,5 +280,18 @@ void main() {
     final colors = GameColors.of(tester.element(find.byType(SettingsScreen)));
     expect(colors.highContrast, isTrue);
     expect(colors.parchment, GameColors.highContrastColors.parchment);
+  });
+
+  testWidgets('settings can switch sound effects off', (tester) async {
+    final progress = await pumpApp(tester);
+    expect(SoundFx.enabled, isTrue);
+    await tester.tap(find.byTooltip('Settings and accessibility'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Sound effects'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sound effects'));
+    await tester.pumpAndSettle();
+    expect(progress.settings.soundOn, isFalse);
+    expect(SoundFx.enabled, isFalse);
   });
 }

@@ -4,6 +4,7 @@ import 'app_scope.dart';
 import 'logic/progress.dart';
 import 'screens/title_screen.dart';
 import 'services/doubt_service.dart';
+import 'services/sound.dart';
 import 'theme/app_theme.dart';
 
 class CodeQuestApp extends StatelessWidget {
@@ -25,6 +26,7 @@ class CodeQuestApp extends StatelessWidget {
         listenable: controller,
         builder: (context, _) {
           final settings = controller.settings;
+          SoundFx.enabled = settings.soundOn;
           return MaterialApp(
             title: 'CodeQuest - Learn to Code by Playing',
             debugShowCheckedModeBanner: false,

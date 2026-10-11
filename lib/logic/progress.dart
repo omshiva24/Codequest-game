@@ -28,6 +28,7 @@ class AppSettings {
     this.reduceMotion = false,
     this.timerMode = TimerMode.normal,
     this.textScale = 1.0,
+    this.soundOn = true,
   });
 
   static const List<double> textScales = [1.0, 1.15, 1.3];
@@ -36,18 +37,21 @@ class AppSettings {
   final bool reduceMotion;
   final TimerMode timerMode;
   final double textScale;
+  final bool soundOn;
 
   AppSettings copyWith({
     bool? highContrast,
     bool? reduceMotion,
     TimerMode? timerMode,
     double? textScale,
+    bool? soundOn,
   }) =>
       AppSettings(
         highContrast: highContrast ?? this.highContrast,
         reduceMotion: reduceMotion ?? this.reduceMotion,
         timerMode: timerMode ?? this.timerMode,
         textScale: textScale ?? this.textScale,
+        soundOn: soundOn ?? this.soundOn,
       );
 
   Map<String, Object> toJson() => {
@@ -55,6 +59,7 @@ class AppSettings {
         'reduceMotion': reduceMotion,
         'timerMode': timerMode.name,
         'textScale': textScale,
+        'soundOn': soundOn,
       };
 
   /// Reads settings defensively: anything unexpected falls back to defaults.
@@ -71,6 +76,8 @@ class AppSettings {
       textScale: (scale is num && textScales.contains(scale.toDouble()))
           ? scale.toDouble()
           : 1.0,
+      // Sound is on unless the player switched it off.
+      soundOn: json['soundOn'] != false,
     );
   }
 }

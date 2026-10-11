@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import 'scenes.dart';
 
@@ -81,7 +82,7 @@ class _GameButtonState extends State<GameButton> {
 
   void _activate() {
     if (!_enabled) return;
-    HapticFeedback.selectionClick();
+    SoundFx.play(Sfx.tap);
     widget.onPressed!();
   }
 
@@ -734,7 +735,7 @@ class _PressableState extends State<Pressable> {
   bool _focused = false;
 
   void _tap() {
-    HapticFeedback.selectionClick();
+    SoundFx.play(Sfx.tap);
     widget.onTap();
   }
 

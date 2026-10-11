@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../logic/progress.dart';
+import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/game_ui.dart';
@@ -85,6 +86,28 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              ),
+            ),
+            section(
+              'Sound',
+              ButtonTone.gold,
+              Icons.volume_up_rounded,
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('Sound effects', style: displayStyle(20, color: g.ink)),
+                  subtitle: Text('Retro beeps for coins, hits, stars and wins.', style: subtitleStyle),
+                  value: settings.soundOn,
+                  onChanged: (v) {
+                    progress.updateSettings(settings.copyWith(soundOn: v));
+                    // Let the player hear what they just switched on.
+                    if (v) {
+                      SoundFx.enabled = true;
+                      SoundFx.play(Sfx.coin);
+                    }
+                  },
+                ),
               ),
             ),
             section(
