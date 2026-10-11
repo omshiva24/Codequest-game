@@ -51,7 +51,7 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _bolt = AnimationController(vsync: this, duration: const Duration(milliseconds: 420))
+    _bolt = AnimationController(vsync: this, duration: const Duration(milliseconds: 560))
       ..addStatusListener((s) {
         if (s == AnimationStatus.completed && mounted) {
           _enemyHit.forward(from: 0);
@@ -396,9 +396,9 @@ class _BattleScreenState extends State<BattleScreen> with TickerProviderStateMix
               ),
               // Damage number
               Positioned(
-                left: enemyCenter.dx - 60,
-                width: 120,
-                top: enemyCenter.dy - 70,
+                left: enemyCenter.dx - 70,
+                width: 140,
+                top: enemyCenter.dy - 10,
                 child: Center(
                   child: FloatingPopup(
                     trigger: _damageTick,

@@ -25,15 +25,25 @@ class HomeScreen extends StatelessWidget {
         const Positioned.fill(child: SceneBackground(kind: SceneKind.menu)),
         Scaffold(
           backgroundColor: Colors.transparent,
-          floatingActionButton: GameButton(
-            tone: ButtonTone.sky,
-            semanticLabel: 'Doubt Buddy: ask Byte a question',
-            onPressed: () => openDoubtBuddy(context),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [Emoji('🦉', size: 26), SizedBox(width: 8), _FabLabel()],
-            ),
-          ),
+          floatingActionButton: MediaQuery.sizeOf(context).width < 600
+              ? GameButton(
+                  tone: ButtonTone.sky,
+                  circle: true,
+                  size: GameButtonSize.large,
+                  tooltip: 'Doubt Buddy',
+                  semanticLabel: 'Doubt Buddy: ask Byte a question',
+                  onPressed: () => openDoubtBuddy(context),
+                  child: const Emoji('🦉', size: 32),
+                )
+              : GameButton(
+                  tone: ButtonTone.sky,
+                  semanticLabel: 'Doubt Buddy: ask Byte a question',
+                  onPressed: () => openDoubtBuddy(context),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [Emoji('🦉', size: 26), SizedBox(width: 8), _FabLabel()],
+                  ),
+                ),
           body: SafeArea(
             child: PageBody(
               maxWidth: 980,
@@ -179,12 +189,22 @@ class _PlayerHud extends StatelessWidget {
       ],
     );
 
-    return Wrap(
-      spacing: 16,
-      runSpacing: 14,
-      alignment: WrapAlignment.spaceBetween,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [identity, pills, buttons],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 720) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [Expanded(child: identity), buttons]),
+              const SizedBox(height: 12),
+              pills,
+            ],
+          );
+        }
+        return Row(
+          children: [identity, const Spacer(), pills, const SizedBox(width: 16), buttons],
+        );
+      },
     );
   }
 }

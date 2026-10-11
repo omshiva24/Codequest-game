@@ -133,6 +133,7 @@ class SceneBackground extends StatefulWidget {
 class _SceneBackgroundState extends State<SceneBackground> with SingleTickerProviderStateMixin {
   late final AnimationController _c =
       AnimationController(vsync: this, duration: const Duration(seconds: 24), value: 0.3);
+  late final _FrameLimiter _frames = _FrameLimiter(_c, const Duration(milliseconds: 33));
 
   @override
   void didChangeDependencies() {
@@ -151,6 +152,7 @@ class _SceneBackgroundState extends State<SceneBackground> with SingleTickerProv
 
   @override
   void dispose() {
+    _frames.dispose();
     _c.dispose();
     super.dispose();
   }
@@ -161,7 +163,7 @@ class _SceneBackgroundState extends State<SceneBackground> with SingleTickerProv
     return RepaintBoundary(
       child: ExcludeSemantics(
         child: CustomPaint(
-          painter: ScenePainter(widget.kind, _c, highContrast: hc),
+          painter: ScenePainter(widget.kind, _c, highContrast: hc, repaint: _frames),
           child: const SizedBox.expand(),
         ),
       ),
@@ -192,8 +194,36 @@ List<_P> _particles(int seed, int n) => _particleCache.putIfAbsent(seed, () {
 
 const _tau = math.pi * 2;
 
+/// Passes on at most one repaint per [interval] - the scenery is ambient
+/// motion, so ~30 fps looks smooth and halves the drawing work.
+class _FrameLimiter extends ChangeNotifier {
+  _FrameLimiter(this.source, this.interval) {
+    source.addListener(_tick);
+  }
+
+  final Animation<double> source;
+  final Duration interval;
+  final Stopwatch _clock = Stopwatch()..start();
+  Duration _last = Duration.zero;
+
+  void _tick() {
+    final now = _clock.elapsed;
+    if (now - _last >= interval) {
+      _last = now;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    source.removeListener(_tick);
+    super.dispose();
+  }
+}
+
 class ScenePainter extends CustomPainter {
-  ScenePainter(this.kind, this.anim, {required this.highContrast}) : super(repaint: anim);
+  ScenePainter(this.kind, this.anim, {required this.highContrast, Listenable? repaint})
+      : super(repaint: repaint ?? anim);
 
   final SceneKind kind;
   final Animation<double> anim;
