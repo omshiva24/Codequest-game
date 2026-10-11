@@ -129,6 +129,9 @@ void main() {
     final level = levelById('py-1')!;
     await _pump(tester, LessonScreen(level: level));
     await _frames(tester, 1);
+    // The buttons are at the end of the lesson.
+    await tester.scrollUntilVisible(find.text('Start Code Runner'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.pump();
     expect(find.text('Watch Byte play'), findsOneWidget);
     expect(find.text('Play step by step (no timer)'), findsOneWidget);
 
@@ -145,6 +148,9 @@ void main() {
     final level = levelById('py-1')!;
     await _pump(tester, LessonScreen(level: level), settings: const AppSettings(reduceMotion: true));
     await tester.pump();
+    await tester.scrollUntilVisible(find.text('Start Code Runner'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.pump();
+    expect(find.text('I have a doubt'), findsOneWidget, reason: 'scrolled to the buttons');
     expect(find.text('Watch Byte play'), findsNothing);
     expect(find.text('Play step by step (no timer)'), findsNothing);
   });
