@@ -305,11 +305,15 @@ class ProgressController extends ChangeNotifier {
   }
 
   /// Records a finished level and returns what the player earned.
+  /// Most coins a single run can add on top of the level reward.
+  static const int maxBonusCoins = 300;
+
   LevelReward recordResult(
     Level level, {
     required int stars,
     required int correct,
     int bestCombo = 0,
+    int bonusCoins = 0,
   }) {
     final safeStars = stars.clamp(0, 3);
     final oldLevel = playerLevel;
@@ -317,7 +321,8 @@ class ProgressController extends ChangeNotifier {
     final wasNextLocked = nextLevel(level) != null && !isUnlocked(nextLevel(level)!);
 
     final xpGain = xpFor(correct: correct, stars: safeStars, isBoss: level.isBoss);
-    final coinGain = coinsFor(correct: correct, stars: safeStars);
+    // Coins picked up on the track count too (capped, so saves stay sane).
+    final coinGain = coinsFor(correct: correct, stars: safeStars) + bonusCoins.clamp(0, maxBonusCoins);
     _xp = (_xp + xpGain).clamp(0, _maxCounter);
     _coins = (_coins + coinGain).clamp(0, _maxCounter);
     if (safeStars > previousBest) _stars[level.id] = safeStars;

@@ -41,6 +41,9 @@ int coinsFor({required int correct, required int stars}) {
 
 const int xpPerPlayerLevel = 150;
 
+/// Price of the 50/50 power-up, in coins.
+const int fiftyFiftyCost = 15;
+
 int playerLevelFor(int xp) => 1 + (xp < 0 ? 0 : xp) ~/ xpPerPlayerLevel;
 
 /// Progress (0..1) towards the next player level.

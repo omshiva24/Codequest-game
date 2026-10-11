@@ -34,6 +34,7 @@ class GameOutcome {
     required this.stars,
     this.review = const [],
     this.bestCombo = 0,
+    this.bonusCoins = 0,
   });
 
   final Level level;
@@ -45,6 +46,9 @@ class GameOutcome {
 
   /// Most right answers in a row during this play.
   final int bestCombo;
+
+  /// Coins collected along the way (the runner track).
+  final int bonusCoins;
 }
 
 /// Page change with a quick game-style "zoom in" (a plain cut when motion is
@@ -89,6 +93,7 @@ void finishLevel(BuildContext context, GameOutcome outcome) {
     stars: outcome.stars,
     correct: outcome.correct,
     bestCombo: outcome.bestCombo,
+    bonusCoins: outcome.bonusCoins,
   );
   Navigator.of(context).pushReplacement(
     gameRoute<void>(ResultScreen(outcome: outcome, reward: reward)),
