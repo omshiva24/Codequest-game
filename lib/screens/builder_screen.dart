@@ -458,6 +458,7 @@ class _BuilderScreenState extends State<BuilderScreen> with TickerProviderStateM
                             Expanded(
                               flex: 11,
                               child: ListView(
+                                primary: false,
                                 padding: const EdgeInsets.fromLTRB(16, 4, 8, 28),
                                 children: [goal, const SizedBox(height: 10), stage],
                               ),
@@ -465,6 +466,7 @@ class _BuilderScreenState extends State<BuilderScreen> with TickerProviderStateM
                             Expanded(
                               flex: 9,
                               child: ListView(
+                                primary: false,
                                 padding: const EdgeInsets.fromLTRB(8, 4, 16, 28),
                                 children: [
                                   editor,
