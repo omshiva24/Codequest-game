@@ -246,17 +246,42 @@ try {
   await sleep(1400);
   await shot('03-lesson');
 
-  // Runner game
-  await tapScrolling('Start Code Runner');
-  await sleep(2200);
+  // Code Runner (action game): film Byte's demo run - real running, jumping,
+  // sliding, coins and code gates.
+  await tapScrolling('Watch Byte play');
+  await sleep(4500); // page change + 3-2-1 countdown
   await shot('04-runner');
+  await sleep(5200);
+  await shot('05-runner-correct'); // just after the first code gate
+  await sleep(11000);
+  await shot('05b-runner-action');
+  // The demo ends back on the lesson.
+  await locate('Watch Byte play', { timeout: 150000 });
+  await sleep(800);
+
+  // Play level 1 for real in the calm, step-by-step runner ("No timer"),
+  // which a script can drive, to unlock the next levels.
+  const wasRecording = recording;
+  recording = false;
+  await goHome();
+  await tap('Settings and accessibility');
+  await tapScrolling('No timer');
+  await sleep(500);
+  await goHome();
+  await tap('Python Jungle.');
+  await sleep(600);
+  await tap('Level 1: Hello, Python!');
+  await sleep(1000);
+  await tapScrolling('Start Code Runner');
+  await sleep(1500);
   for (let i = 0; i < runnerAnswers.length; i++) {
     await tap(`: ${runnerAnswers[i]}`, { exact: false });
     await tap('Run through gate');
-    if (i === 0) await shot('05-runner-correct');
     await tapScrolling(i === runnerAnswers.length - 1 ? 'See results' : 'Next gate');
     await sleep(600);
   }
+  recording = wasRecording;
+  if (recording) recordLoop();
   await sleep(1800);
   await shot('06-results');
 

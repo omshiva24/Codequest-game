@@ -18,7 +18,7 @@ Press **Play** on the title screen, pick a world and climb its winding map. Ever
 
 | | Mini-game | Inspired by | What you do |
 |---|---|---|---|
-| 🏃 | **Code Runner** | Temple Run | Answers are gates rushing down a 3-lane track. Switch lanes and dash through the right gate before it reaches you. |
+| 🏃 | **Code Runner** | Temple Run | A real endless runner. You keep running on your own: swipe or use the arrow keys to switch lanes, **jump** logs and lava, **slide** under vines and beams, grab coins, shields and hint orbs. Questions come as **code gates** across the track — run through the right answer. Crash or pick a wrong gate and the **Bug Monster** catches up; do it again while it's close and you lose a heart. Press **Watch Byte play** on the lesson to see a demo run first. |
 | 👾 | **Bug Battle** | Pokémon | A bug monster attacks. Pick the right move to fire a code bolt at it. Missed questions come back so you can still win. |
 | 🧱 | **Block Builder** | Code editor | Snap shuffled code blocks into the editor in the right order, press **Run code** and watch the program's output appear in the console. |
 
@@ -51,8 +51,10 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | Title screen | Home | World map |
 |---|---|---|
 | ![Title](docs/screenshots/00-title.png) | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) |
-| **Lesson with Byte** | **Code Runner** | **Right gate!** |
+| **Lesson with Byte** | **Code Runner: run!** | **Code gate passed** |
 | ![Lesson](docs/screenshots/03-lesson.png) | ![Runner](docs/screenshots/04-runner.png) | ![Runner feedback](docs/screenshots/05-runner-correct.png) |
+| **Dodging obstacles** | | |
+| ![Runner action](docs/screenshots/05b-runner-action.png) | | |
 | **Level clear** | **Bug Battle** | **Code bolt attack** |
 | ![Results](docs/screenshots/06-results.png) | ![Battle](docs/screenshots/07-battle.png) | ![Attack](docs/screenshots/08-battle-attack.png) |
 | **Learning from a miss** | **Block Builder** | **Run code: console output** |
@@ -84,8 +86,8 @@ See [SECURITY.md](SECURITY.md).
 
 ### ♿ Accessibility
 - **Screen readers:** every button, gate, move and block has a clear label; hearts, health and stars are read out ("2 of 3 hearts left"); feedback is announced with live regions. On the web, accessibility is switched on at start-up so screen readers work immediately.
-- **Full keyboard play:** Tab/Enter everywhere; Runner: ←/→ or 1–3 to change lane, Space to dash; Battle: 1–4 to attack.
-- **No timing pressure if you need it:** Runner timer can be Normal, Relaxed (2×) or Off (WCAG 2.2.1).
+- **Full keyboard play:** Tab/Enter everywhere; Runner: ←/→ or 1–3 to change lane, ↑/Space to jump, ↓ to slide, Esc to pause; Battle: 1–4 to attack.
+- **No timing pressure if you need it:** the Runner can be **Relaxed** (slower, fewer obstacles) or **No timer**. With No timer, Reduce motion or a screen reader, the Code Runner becomes a calm, step-by-step version: pick a gate, then press Go (WCAG 2.2.1). Switching tabs pauses the run.
 - **Reduce motion** setting (and respects the device setting): stops the animated scenes, moving gates, shakes and confetti.
 - **High-contrast mode** and **bigger text** (3 sizes, on top of the device text size).
 - Colour is never the only signal — right/wrong always also shows ✓/✗ icons and text.
@@ -98,6 +100,8 @@ See [SECURITY.md](SECURITY.md).
   - [`progress_test.dart`](test/progress_test.dart) — unlocking, streaks, badges, coin spending, saving/loading, tampered-data handling
   - [`sound_test.dart`](test/sound_test.dart) — every sound effect is short and quiet, and playing sounds is safe on every platform
   - [`doubt_service_test.dart`](test/doubt_service_test.dart) — input sanitising, topic matching, AI → offline fallback with a mock server
+  - [`run_engine_test.dart`](test/run_engine_test.dart) — the action runner's rules: track generation always leaves a way through, jumping, sliding, crashes, the chasing monster, shields, hint orbs, gates; a bot finishes 40 random tracks
+  - [`temple_run_test.dart`](test/temple_run_test.dart) — plays the action runner through the real screen frame by frame, the "Watch Byte play" demo (saves nothing), keyboard controls and pause
   - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: runner (keyboard, timer, 50/50), battle, puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
   - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 12 screens, in normal and high-contrast mode
 - **API tests** (`npm test`) — validation, rate limiting, origin check, handler status codes.
