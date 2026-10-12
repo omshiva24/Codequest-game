@@ -3,6 +3,8 @@
 
 // "Who's playing?" end to end in the app (with a pretend server).
 
+import 'dart:async';
+
 import 'package:codequest/app.dart';
 import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/progress.dart';
@@ -19,8 +21,8 @@ import 'support/fake_account_server.dart';
 
 const _calm = AppSettings(reduceMotion: true, timerMode: TimerMode.off);
 
-class _Rig {
-  _Rig(this.server, this.progress, this.guest, this.session);
+class Rig {
+  Rig(this.server, this.progress, this.guest, this.session);
 
   final FakeAccountServer server;
   final ProgressController progress;
@@ -28,7 +30,7 @@ class _Rig {
   final SessionController session;
 }
 
-Future<_Rig> pumpRig(WidgetTester tester, {FakeAccountServer? server, String? guestSave}) async {
+Future<Rig> pumpRig(WidgetTester tester, {FakeAccountServer? server, String? guestSave}) async {
   tester.view.physicalSize = const Size(900, 1600);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -37,9 +39,11 @@ Future<_Rig> pumpRig(WidgetTester tester, {FakeAccountServer? server, String? gu
   final guest = MemoryProgressStorage(guestSave);
   final session = SessionController(progress: progress, accounts: s.service(), guestStorage: guest);
   await tester.pumpWidget(CodeQuestApp(controller: progress, session: session, doubtService: DoubtService()));
-  await tester.runAsync(session.restore);
+  // The pretend server answers with microtasks only, so everything runs in
+  // the test's fake time (no real waiting).
+  unawaited(session.restore());
   await tester.pumpAndSettle();
-  return _Rig(s, progress, guest, session);
+  return Rig(s, progress, guest, session);
 }
 
 /// A game button, or a dialog button, with this label.
@@ -58,15 +62,8 @@ Future<void> tapText(WidgetTester tester, String text) async {
 
 /// Taps a button whose work talks to the (fake) server.
 Future<void> tapAndWait(WidgetTester tester, String text) async {
-  final finder = labelled(text);
-  await tester.ensureVisible(finder.first);
-  await tester.pumpAndSettle();
-  await tester.runAsync(() async {
-    await tester.tap(finder.first);
-    for (var i = 0; i < 10; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 5));
-    }
-  });
+  await tapText(tester, text);
+  await tester.pump(const Duration(milliseconds: 100));
   await tester.pumpAndSettle();
 }
 
@@ -103,10 +100,7 @@ void main() {
     expect(rig.server.accounts.keys, ['om@example.com']);
 
     // Om plays a level.
-    await tester.runAsync(() async {
-      rig.progress.recordResult(levelById('py-1')!, stars: 3, correct: 5);
-      await Future<void>.delayed(const Duration(milliseconds: 20));
-    });
+    rig.progress.recordResult(levelById('py-1')!, stars: 3, correct: 5);
     await tester.pumpAndSettle();
     expect(rig.server.saves['om@example.com'], isNotNull);
 
