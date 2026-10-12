@@ -879,10 +879,19 @@ class StagePainter extends CustomPainter {
     final x = geo.x(8);
     final height = t * 2.6;
     final top = geo.ground - height;
-    // Stone arch around the gate.
+    // Stone archway: two pillars and a lintel, so the gate still stands
+    // (and Byte walks through it) once the bars have lifted.
     final arch = Paint()..color = highContrast ? Colors.black : _look.groundDark;
-    canvas.drawRect(Rect.fromLTWH(x - t * 0.35, top - t * 0.45, t * 1.1, t * 0.45), arch);
-    canvas.drawRect(Rect.fromLTWH(x - t * 0.35, top - t * 0.45, t * 1.1, t * 0.45), _inkStroke);
+    final stones = [
+      Rect.fromLTWH(x - t * 0.35, top - t * 0.45, t * 0.15, height + t * 0.45),
+      Rect.fromLTWH(x + t * 0.6, top - t * 0.45, t * 0.15, height + t * 0.45),
+      Rect.fromLTWH(x - t * 0.35, top - t * 0.45, t * 1.1, t * 0.45),
+    ];
+    for (final stone in stones) {
+      canvas
+        ..drawRect(stone, arch)
+        ..drawRect(stone, _inkStroke);
+    }
     // Portcullis bars, lifting up when the gate opens.
     final lift = _openAmount * height;
     canvas.save();
