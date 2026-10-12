@@ -74,10 +74,10 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const _FactCard(),
                   const SizedBox(height: 20),
-                  const Center(
+                  Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 520),
-                      child: CreatorCredit(showCopyright: true),
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: const CreatorCredit(showCopyright: true),
                     ),
                   ),
                 ],
