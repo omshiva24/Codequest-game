@@ -251,6 +251,12 @@ class StageGeometry {
 
   /// Where Byte walks to (and celebrates) after a success. He stays in view.
   double get finishX => x(12.2);
+
+  /// Top of the water, pit or lava in a gap.
+  double get hazardSurface => ground + tile * 0.55;
+
+  /// After falling in, Byte bobs with his head and shoulders above the surface.
+  double get swimFeet => hazardSurface + tile * 1.1;
 }
 
 enum HeroAction { stand, walk, jump, fall, bonk }
@@ -380,12 +386,17 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
       final edge = geo.x(5 + math.min(s.built, gap)) + t * 0.25;
       if (a < 0.45) return walkTo(edge, ground, a / 0.45);
       final u = _seg(a, 0.45, 1);
+      final sink = math.min(1.0, u / 0.7);
+      final bob = u > 0.7 ? math.sin(s.clock * math.pi * 1.6) * t * 0.06 : 0.0;
+      // Stay inside the gap so Byte never overlaps the far bank.
+      final inGap = (edge + t * 0.7 * sink).clamp(geo.x(5) + t * 0.6, geo.x(5 + gap) - t * 0.4);
       return HeroPose(
-        x: edge + t * 0.7 * u,
-        y: ground + t * 2.6 * u * u,
+        x: inGap,
+        y: _lerp(ground, geo.swimFeet, sink * sink) + bob,
         action: HeroAction.fall,
-        rotation: u * 1.4,
-        splash: _seg(u, 0.45, 1),
+        rotation: math.sin(sink * math.pi) * 0.9,
+        stars: u > 0.75,
+        splash: _seg(u, 0.35, 1),
       );
 
     case Obstacle.ledge:
@@ -605,6 +616,35 @@ class StagePainter extends CustomPainter {
     }
     if (hero.visible && hero.x > -geo.tile * 2 && hero.x < size.width + geo.tile * 2) {
       _hero(canvas, geo);
+      if (scene.obstacle == Obstacle.gap && hero.y > geo.hazardSurface) _hazardFront(canvas, size, geo);
+    }
+  }
+
+  /// The front of the water (or pit, or lava), drawn over Byte so he looks
+  /// like he is in it, not on top of it.
+  void _hazardFront(Canvas canvas, Size size, StageGeometry geo) {
+    final t = geo.tile;
+    final left = geo.x(5);
+    final right = geo.x(5 + scene.size);
+    final surface = geo.hazardSurface;
+    canvas.drawRect(
+      Rect.fromLTRB(left, surface, right, size.height),
+      Paint()..color = _look.hazard.withValues(alpha: highContrast ? 1 : 0.9),
+    );
+    final light = Paint()
+      ..color = _look.hazardLight
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke;
+    if (scene.lang == Lang.c && !highContrast) return; // a dry crystal pit: no ripples
+    final shift = (scene.clock * t * 0.64) % (t * 0.8);
+    for (var x = left - t + shift; x < right; x += t * 0.8) {
+      final y = surface + t * 0.12;
+      canvas.drawPath(
+        Path()
+          ..moveTo(math.max(left, x), y)
+          ..quadraticBezierTo(x + t * 0.2, y - t * 0.12, math.min(right, x + t * 0.4), y),
+        light,
+      );
     }
   }
 
@@ -728,7 +768,7 @@ class StagePainter extends CustomPainter {
     final left = geo.x(5);
     final right = geo.x(5 + gap);
     // Hazard below.
-    final surface = geo.ground + t * 0.55;
+    final surface = geo.hazardSurface;
     canvas.drawRect(Rect.fromLTRB(left, surface, right, size.height), Paint()..color = _look.hazard);
     final light = Paint()
       ..color = _look.hazardLight

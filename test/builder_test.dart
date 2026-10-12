@@ -323,6 +323,36 @@ void main() {
       }
     });
 
+    test('after falling in, Byte bobs in the gap with his head above the surface', () {
+      for (final aspect in [BuilderStage.minAspect, BuilderStage.defaultAspect, BuilderStage.maxAspect]) {
+        final geo = StageGeometry(Size(700, 700 / aspect));
+        var checked = 0;
+        for (final c in _all.where((c) => c.obstacle == Obstacle.gap)) {
+          for (var i = 0; i < c.options.length; i++) {
+            final run = c.run(i);
+            if (run.outcome != BuildOutcome.fall) continue;
+            final pose = heroPoseFor(
+              StageScene(
+                lang: c.lang,
+                obstacle: c.obstacle,
+                size: c.size,
+                built: run.amount,
+                outcome: run.outcome,
+                act: 1,
+              ),
+              geo,
+            );
+            final headTop = pose.y - geo.tile * StageGeometry.heroHeight;
+            expect(headTop, lessThan(geo.hazardSurface), reason: '${c.id} option $i: head under water');
+            expect(pose.y, greaterThan(geo.hazardSurface), reason: '${c.id} option $i: should be in the gap');
+            expect(pose.x, inInclusiveRange(geo.x(5), geo.x(5 + c.size)), reason: '${c.id} option $i');
+            checked++;
+          }
+        }
+        expect(checked, greaterThan(0));
+      }
+    });
+
     test('walking in, then standing at the start', () {
       final geo = StageGeometry(const Size(700, 350));
       const s = StageScene(lang: Lang.c, obstacle: Obstacle.gap, size: 4, enter: 0.5);
