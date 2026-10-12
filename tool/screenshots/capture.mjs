@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 // Plays through CodeQuest in a headless browser and saves screenshots plus
 // video frames. Used by .github/workflows/screenshots.yml.
 //

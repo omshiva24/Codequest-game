@@ -1,10 +1,15 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 import 'dart:math';
 
 import 'package:codequest/app.dart';
 import 'package:codequest/app_scope.dart';
 import 'package:codequest/data/builder_levels.dart';
+import 'package:codequest/data/creator.dart';
 import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/progress.dart';
+import 'package:codequest/screens/about_screen.dart';
 import 'package:codequest/screens/achievements_screen.dart';
 import 'package:codequest/screens/battle_screen.dart';
 import 'package:codequest/screens/builder_screen.dart';
@@ -65,6 +70,42 @@ Finder semantics(String pattern) => find.bySemanticsLabel(RegExp(pattern));
 String esc(String s) => RegExp.escape(s);
 
 void main() {
+  testWidgets('the creator is named in the game and the message opens', (tester) async {
+    final handle = tester.ensureSemantics();
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final progress = ProgressController(storage: MemoryProgressStorage())..updateSettings(_calm);
+    await tester.pumpWidget(CodeQuestApp(controller: progress, doubtService: DoubtService()));
+    await tester.pumpAndSettle();
+    // Title screen credit, read out in full by screen readers.
+    expect(find.bySemanticsLabel('Created by $creatorName, $creatorDetails'), findsOneWidget);
+    expect(find.text(copyrightLine), findsOneWidget);
+    final why = find.text('Why I made this');
+    await tester.ensureVisible(why);
+    await tester.pumpAndSettle();
+    await tester.tap(why);
+    await tester.pumpAndSettle();
+    expect(find.byType(AboutScreen), findsOneWidget);
+    expect(find.text(creatorName), findsOneWidget);
+    expect(find.text(whyTitle), findsOneWidget);
+    expect(find.text(whyMessage.first), findsOneWidget);
+    expect(find.text(noCopyNotice), findsOneWidget);
+    handle.dispose();
+  });
+
+  testWidgets('home and settings also credit the creator', (tester) async {
+    await pumpApp(tester); // already past the title screen
+    expect(find.byType(HomeScreen), findsOneWidget);
+    final credit = find.byType(CreatorCredit);
+    await tester.ensureVisible(credit);
+    await tester.pumpAndSettle();
+    expect(credit, findsOneWidget);
+    await tester.tap(find.byTooltip('Settings and accessibility'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CreatorCredit), findsOneWidget);
+  });
+
   testWidgets('title screen leads to the home hub with all four worlds', (tester) async {
     final handle = tester.ensureSemantics();
     tester.view.physicalSize = const Size(900, 1600);

@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 /// Short "Did you know?" facts shown on the home screen - one per day.
 const List<String> funFacts = [
   'Python is named after the comedy group Monty Python, not the snake.',

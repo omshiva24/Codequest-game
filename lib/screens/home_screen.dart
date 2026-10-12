@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
@@ -9,6 +12,7 @@ import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/game_ui.dart';
 import '../widgets/scenes.dart';
+import 'about_screen.dart';
 import 'achievements_screen.dart';
 import 'navigation.dart';
 import 'settings_screen.dart';
@@ -69,6 +73,13 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const _FactCard(),
+                  const SizedBox(height: 20),
+                  const Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 520),
+                      child: CreatorCredit(showCopyright: true),
+                    ),
+                  ),
                 ],
               ),
             ),
