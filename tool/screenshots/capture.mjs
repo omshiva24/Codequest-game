@@ -221,7 +221,8 @@ async function goHome() {
 const battleAnswers = ["<class 'str'>", 'my_score', '15', 'float', 'Hi Om'];
 const puzzleLines = ['age = 20', 'if age >= 18:', 'print("Adult")', 'else:', 'print("Kid")'];
 
-try {
+/** Desktop-size play-through: every game mode, results, trophies, settings. */
+async function desktopShots() {
   await page.setViewport({ width: 1280, height: 860, deviceScaleFactor: 1 });
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
   await locate('Play', { timeout: 60000, exact: true });
@@ -377,6 +378,10 @@ try {
   await shot('14-high-contrast');
   await tap('High contrast');
 
+}
+
+/** Phone-size screens. */
+async function phoneShots() {
   // Phone size
   recording = false;
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -396,6 +401,12 @@ try {
   await tapScrolling('Start World Builder');
   await sleep(1500);
   await shot('18-mobile-builder');
+}
+
+try {
+  // ONLY_PHONE=1 skips the long desktop play-through (handy when debugging).
+  if (!process.env.ONLY_PHONE) await desktopShots();
+  await phoneShots();
 } catch (err) {
   console.error('Capture failed:', err.message);
   await page.screenshot({ path: join(OUT, 'zz-error.png') }).catch(() => {});
