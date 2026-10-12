@@ -274,6 +274,55 @@ void main() {
       }
     });
 
+    test('after a success Byte stays on screen and celebrates', () {
+      for (final aspect in [BuilderStage.minAspect, BuilderStage.defaultAspect, BuilderStage.maxAspect]) {
+        final geo = StageGeometry(Size(700, 700 / aspect));
+        for (final c in _all) {
+          final right = c.run(c.answer);
+          expect(right.success, isTrue, reason: c.id);
+          final scene = StageScene(
+            lang: c.lang,
+            obstacle: c.obstacle,
+            size: c.size,
+            built: right.amount,
+            outcome: right.outcome,
+            act: 1,
+            jump: right.amount,
+          );
+          final pose = heroPoseFor(scene, geo);
+          expect(pose.visible, isTrue, reason: c.id);
+          expect(pose.x, inExclusiveRange(geo.tile, geo.width - geo.tile), reason: '${c.id} ends off screen');
+        }
+      }
+    });
+
+    test('a correct jump never touches the ceiling spikes', () {
+      for (final aspect in [BuilderStage.minAspect, BuilderStage.defaultAspect, BuilderStage.maxAspect]) {
+        final geo = StageGeometry(Size(700, 700 / aspect));
+        for (final c in _all.where((c) => c.obstacle == Obstacle.ledge)) {
+          final right = c.run(c.answer);
+          final spikeTips = geo.ceilingBottom(c.size) + geo.tile * 0.32;
+          expect(geo.ceilingBottom(c.size), greaterThan(0), reason: '${c.id}: ceiling must be on screen');
+          for (var a = 0.0; a <= 1.0; a += 0.02) {
+            final pose = heroPoseFor(
+              StageScene(
+                lang: c.lang,
+                obstacle: c.obstacle,
+                size: c.size,
+                built: right.amount,
+                outcome: right.outcome,
+                act: a,
+                jump: right.amount,
+              ),
+              geo,
+            );
+            final headTop = pose.y - geo.tile * StageGeometry.heroHeight;
+            expect(headTop, greaterThan(spikeTips), reason: '${c.id} at $a (aspect $aspect)');
+          }
+        }
+      }
+    });
+
     test('walking in, then standing at the start', () {
       final geo = StageGeometry(const Size(700, 350));
       const s = StageScene(lang: Lang.c, obstacle: Obstacle.gap, size: 4, enter: 0.5);

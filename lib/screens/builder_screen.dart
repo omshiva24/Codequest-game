@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -375,16 +376,16 @@ class _BuilderScreenState extends State<BuilderScreen> with TickerProviderStateM
       goal: _challenge.goal,
       hint: _hintOpen ? _challenge.hint : null,
     );
-    final stage = Shake(
-      trigger: _shakeTick,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_act, _enter, _clock]),
-        builder: (context, _) {
-          final scene = _scene();
-          return BuilderStage(scene: scene, description: _describe(scene));
-        },
-      ),
-    );
+    Widget stageWith(double aspect) => Shake(
+          trigger: _shakeTick,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([_act, _enter, _clock]),
+            builder: (context, _) {
+              final scene = _scene();
+              return BuilderStage(scene: scene, description: _describe(scene), aspect: aspect);
+            },
+          ),
+        );
     final editor = _CodeEditor(
       challenge: _challenge,
       choice: _session.choice,
@@ -449,6 +450,13 @@ class _BuilderScreenState extends State<BuilderScreen> with TickerProviderStateM
               child: LayoutBuilder(
                 builder: (context, box) {
                   if (box.maxWidth >= 980) {
+                    // Make the stage as tall as the window allows, so the
+                    // world (not empty background) fills the screen.
+                    final stageWidth = math.min(box.maxWidth, 1360.0) * 11 / 20 - 24;
+                    final stageHeight = box.maxHeight - 170;
+                    final aspect = stageHeight <= 0
+                        ? BuilderStage.maxAspect
+                        : (stageWidth / stageHeight).clamp(BuilderStage.minAspect, BuilderStage.maxAspect);
                     return Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1360),
@@ -460,7 +468,7 @@ class _BuilderScreenState extends State<BuilderScreen> with TickerProviderStateM
                               child: ListView(
                                 primary: false,
                                 padding: const EdgeInsets.fromLTRB(16, 4, 8, 28),
-                                children: [goal, const SizedBox(height: 10), stage],
+                                children: [goal, const SizedBox(height: 10), stageWith(aspect)],
                               ),
                             ),
                             Expanded(
@@ -487,7 +495,7 @@ class _BuilderScreenState extends State<BuilderScreen> with TickerProviderStateM
                       children: [
                         goal,
                         const SizedBox(height: 10),
-                        stage,
+                        stageWith(BuilderStage.defaultAspect),
                         const SizedBox(height: 16),
                         editor,
                         const SizedBox(height: 12),
