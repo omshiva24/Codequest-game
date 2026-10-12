@@ -83,8 +83,8 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | ![Trophies](docs/screenshots/12-trophies.png) | ![Doubt Buddy](docs/screenshots/13-doubt-buddy.png) | ![High contrast](docs/screenshots/14-high-contrast.png) |
 | **Mobile: title** | **Mobile: home** | **Mobile: map** |
 | ![Mobile title](docs/screenshots/15-mobile-title.png) | ![Mobile home](docs/screenshots/16-mobile-home.png) | ![Mobile map](docs/screenshots/17-mobile-map.png) |
-| **Mobile: World Builder** | | |
-| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | | |
+| **Mobile: World Builder** | **About: the creator and why I made this** | |
+| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | ![About](docs/screenshots/19-about.png) | |
 
 Screenshots and the demo video are made automatically by [a GitHub Action](.github/workflows/screenshots.yml) that plays the real game in headless Chrome ([tool/screenshots/capture.mjs](tool/screenshots/capture.mjs)).
 
