@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
-import '../logic/progress.dart';
 import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
