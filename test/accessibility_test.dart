@@ -13,6 +13,7 @@ import 'package:codequest/app_scope.dart';
 import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/achievements.dart';
 import 'package:codequest/logic/progress.dart';
+import 'package:codequest/logic/session.dart';
 import 'package:codequest/models/models.dart';
 import 'package:codequest/screens/about_screen.dart';
 import 'package:codequest/screens/achievements_screen.dart';
@@ -21,6 +22,7 @@ import 'package:codequest/screens/builder_screen.dart';
 import 'package:codequest/screens/doubt_buddy_screen.dart';
 import 'package:codequest/screens/home_screen.dart';
 import 'package:codequest/screens/lesson_screen.dart';
+import 'package:codequest/screens/login_screen.dart';
 import 'package:codequest/screens/navigation.dart';
 import 'package:codequest/screens/puzzle_screen.dart';
 import 'package:codequest/screens/result_screen.dart';
@@ -29,18 +31,31 @@ import 'package:codequest/screens/title_screen.dart';
 import 'package:codequest/screens/world_screen.dart';
 import 'package:codequest/services/doubt_service.dart';
 import 'package:codequest/theme/app_theme.dart';
+import 'package:codequest/widgets/game_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/fake_account_server.dart';
+
 const _calm = AppSettings(reduceMotion: true, timerMode: TimerMode.off);
 
-Future<void> _pump(WidgetTester tester, Widget home, {bool highContrast = false}) async {
+Future<void> _pump(
+  WidgetTester tester,
+  Widget home, {
+  bool highContrast = false,
+  Future<SessionController> Function(ProgressController progress)? session,
+}) async {
   tester.view.physicalSize = const Size(800, 1400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final progress = ProgressController(storage: MemoryProgressStorage())
     ..updateSettings(_calm.copyWith(highContrast: highContrast));
-  await tester.pumpWidget(AppScope(
+  final players = session == null
+      ? SessionController.preloaded(progress)
+      : (await tester.runAsync(() => session(progress)))!;
+  await tester.pumpWidget(SessionScope(
+    session: players,
+    child: AppScope(
     controller: progress,
     doubtService: DoubtService(),
     child: MaterialApp(
@@ -51,6 +66,7 @@ Future<void> _pump(WidgetTester tester, Widget home, {bool highContrast = false}
       ),
       home: home,
     ),
+  ),
   ));
   await tester.pumpAndSettle();
 }
@@ -121,6 +137,68 @@ void main() {
         await _expectAccessible(tester);
         handle.dispose();
       });
+    });
+  }
+
+  for (final highContrast in [false, true]) {
+    final hc = highContrast ? ' (high contrast)' : '';
+
+    testWidgets("who's playing (sign up form) meets accessibility guidelines$hc", (tester) async {
+      final handle = tester.ensureSemantics();
+      final server = FakeAccountServer();
+      await _pump(
+        tester,
+        const LoginScreen(startWithSignUp: true),
+        highContrast: highContrast,
+        session: (p) async => SessionController(
+          progress: p,
+          accounts: server.service(),
+          guestStorage: MemoryProgressStorage('{"xp":90,"stars":{"py-1":3}}'),
+        ),
+      );
+      expect(find.text('Continue guest game'), findsOneWidget);
+      await _expectAccessible(tester);
+      handle.dispose();
+    });
+
+    testWidgets("who's playing (log in, with an error) meets accessibility guidelines$hc", (tester) async {
+      final handle = tester.ensureSemantics();
+      final server = FakeAccountServer();
+      await _pump(
+        tester,
+        const LoginScreen(),
+        highContrast: highContrast,
+        session: (p) async => SessionController(progress: p, accounts: server.service(), guestStorage: MemoryProgressStorage()),
+      );
+      await tester.enterText(find.byType(TextFormField).at(0), 'om@example.com');
+      await tester.enterText(find.byType(TextFormField).at(1), 'wrong-password');
+      await tester.runAsync(() async {
+        await tester.tap(find.widgetWithText(GameButton, 'Log in'));
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+      });
+      await tester.pumpAndSettle();
+      expect(find.text('Email or password is wrong.'), findsOneWidget);
+      await _expectAccessible(tester);
+      handle.dispose();
+    });
+
+    testWidgets('settings for a logged-in player meet accessibility guidelines$hc', (tester) async {
+      final handle = tester.ensureSemantics();
+      final server = FakeAccountServer()..addAccount('om@example.com', 'Om', 'blue-tiger-42');
+      await _pump(
+        tester,
+        const SettingsScreen(),
+        highContrast: highContrast,
+        session: (p) async {
+          final s = SessionController(progress: p, accounts: server.service(), guestStorage: MemoryProgressStorage());
+          await s.login(email: 'om@example.com', password: 'blue-tiger-42');
+          return s;
+        },
+      );
+      expect(find.text('Playing as Om'), findsOneWidget);
+      expect(find.widgetWithText(GameButton, 'Delete my account'), findsOneWidget);
+      await _expectAccessible(tester);
+      handle.dispose();
     });
   }
 
