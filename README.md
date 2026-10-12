@@ -66,11 +66,21 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 - **Optional AI tutor:** if a `GEMINI_API_KEY` is set on Vercel, questions go to a secure server function (`/api/ask`) for richer answers. If the AI is unavailable, the offline buddy answers automatically, so the player is never left without help.
 - Every wrong answer has an **"Ask Doubt Buddy"** button that sends the question and its context.
 
+### 👤 Players: guest or your own account
+Press **Play** and CodeQuest asks **"Who's playing?"**. Every player gets **their own progress** — nobody can see anyone else's.
+- **Play as guest** — no email needed. Progress stays only in this browser on this device. On a shared device you can **continue** the guest game or start a **new guest game**.
+- **Create an account** (name, email, password) — progress is saved **online in your own account**, so you can log in on any device and continue. A new account always starts at level 1. You can **bring your guest game** into a new account.
+- **Switch player / Log out** from the hub or Settings: your progress is saved and wiped from the screen, so the next person starts fresh. If you forget to log out, the title screen says **"Welcome back, Om! — Not you? Switch player"**.
+- **Delete my account** (Settings) removes the account and all of its progress for ever.
+- Your password is stored only as a **scrypt hash**, and your email only as a **coded ID** (keyed HMAC) — never as plain text. Accessibility settings (high contrast, text size…) stay on the device for the next screen, but **progress never does** for account players.
+
 ## Screenshots
 
-| Title screen | Home | World map |
+| Title screen | Who's playing? | Create your account |
 |---|---|---|
-| ![Title](docs/screenshots/00-title.png) | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) |
+| ![Title](docs/screenshots/00-title.png) | ![Who's playing?](docs/screenshots/00b-who-is-playing.png) | ![Create account](docs/screenshots/00c-create-account.png) |
+| **Home (your own progress)** | **World map** | **Settings: player, log out, delete account** |
+| ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) | ![Player settings](docs/screenshots/20-player-settings.png) |
 | **Lesson with Byte** | **World Builder: say the password** | **The gate opens** |
 | ![Lesson](docs/screenshots/03-lesson.png) | ![World Builder](docs/screenshots/04-builder.png) | ![Password](docs/screenshots/05-builder-password.png) |
 | **A variable sets the jump** | **Bug! One block short - Byte falls in** | **Bug fixed: a perfect bridge** |
@@ -83,8 +93,8 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | ![Trophies](docs/screenshots/12-trophies.png) | ![Doubt Buddy](docs/screenshots/13-doubt-buddy.png) | ![High contrast](docs/screenshots/14-high-contrast.png) |
 | **Mobile: title** | **Mobile: home** | **Mobile: map** |
 | ![Mobile title](docs/screenshots/15-mobile-title.png) | ![Mobile home](docs/screenshots/16-mobile-home.png) | ![Mobile map](docs/screenshots/17-mobile-map.png) |
-| **Mobile: World Builder** | **About: the creator and why I made this** | |
-| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | ![About](docs/screenshots/19-about.png) | |
+| **Mobile: World Builder** | **Mobile: next player chooses** | **About: the creator and why I made this** |
+| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | ![Mobile: who's playing?](docs/screenshots/15b-mobile-who-is-playing.png) | ![About](docs/screenshots/19-about.png) |
 
 Screenshots and the demo video are made automatically by [a GitHub Action](.github/workflows/screenshots.yml) that plays the real game in headless Chrome ([tool/screenshots/capture.mjs](tool/screenshots/capture.mjs)).
 
@@ -97,11 +107,20 @@ Screenshots and the demo video are made automatically by [a GitHub Action](.gith
 - **Strict input validation** on the server ([`api/_lib/tutor.js`](api/_lib/tutor.js)): JSON-only, 4 KB body limit, allow-listed fields, length limits, control characters stripped, language must be one of 4 values.
 - **Abuse protection:** per-client rate limiting (10 questions/minute), same-origin check, 15 s upstream timeout, `Cache-Control: no-store`.
 - **Prompt-injection hardening:** student text is sent as *data*, separate from the tutor rules, with a short output limit and Gemini safety settings.
-- **Privacy:** no accounts, no personal data, questions are not logged or stored; progress stays on the device.
+- **Accounts done safely** ([`api/account.js`](api/account.js), [`api/_lib/accounts.js`](api/_lib/accounts.js)):
+  - **Each player can only reach their own data.** The server picks the save file from the **signed session**, never from anything the browser sends — tested: player B can never read or change player A's progress.
+  - Passwords: **scrypt** with a random salt per password, checked in constant time; very common passwords are refused.
+  - Emails are **never stored**: they become a keyed **HMAC-SHA256** id. Storage is a **private** Vercel Blob store (no public URLs; only the server has the token).
+  - Sessions: HMAC-signed tokens in an **HttpOnly, Secure, SameSite=Strict** cookie limited to `/api` (page scripts can't read it), 30-day expiry, tamper-proof.
+  - **Brute-force protection:** login rate limit per client and a 5-minute lock after 5 wrong passwords; unknown emails and wrong passwords get the **same answer and the same timing**.
+  - **CSRF protection:** SameSite=Strict + same-origin check + `Sec-Fetch-Site` check + JSON-only bodies.
+  - Saved progress is **validated field by field** on the server (allow-listed keys, number ranges, 20 KB limit).
+  - Server secrets are **generated on the server** on first use and kept in the private store — no secret is ever in the code, the repo or a chat.
+- **Privacy:** guests need no personal data; account players can delete their account and all data; no ads, no analytics; questions are not logged or stored.
 - **Security headers** on every response ([`vercel.json`](vercel.json)): strict **Content-Security-Policy** (no inline scripts, no third-party scripts), HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy, COOP/CORP.
 - **No third-party CDNs:** the Flutter engine (CanvasKit) and fonts are self-hosted (`--no-web-resources-cdn`, bundled fonts), so the CSP can stay strict.
 - **Untrusted local data is validated:** saved progress is parsed defensively — corrupted or tampered values are clamped or ignored (tested).
-- **Small supply chain:** only 3 runtime packages (`http`, `shared_preferences`, `web` — all from the Dart/Flutter teams); the API has **zero** npm dependencies; Dependabot watches updates; the Flutter SDK version is pinned for builds.
+- **Small supply chain:** only 3 runtime Dart packages (`http`, `shared_preferences`, `web` — all from the Dart/Flutter teams); the API has **one** npm package (`@vercel/blob`, pinned with a lockfile, installed with `npm ci --ignore-scripts`, `npm audit` in CI); Dependabot watches updates; the Flutter SDK version is pinned for builds.
 - Code answers are **never executed** — the game only shows code, so there is no code-execution risk.
 
 See [SECURITY.md](SECURITY.md).
@@ -124,8 +143,10 @@ See [SECURITY.md](SECURITY.md).
   - [`sound_test.dart`](test/sound_test.dart) — every sound effect is short and quiet, and playing sounds is safe on every platform
   - [`doubt_service_test.dart`](test/doubt_service_test.dart) — input sanitising, topic matching, AI → offline fallback with a mock server
   - [`widget_test.dart`](test/widget_test.dart) — title screen → hub, plays full levels: World Builder (perfect run, a bug that costs a heart, running out of hearts, keyboard), battle (incl. 50/50), puzzle (incl. console output and wrong order), trophy room, Doubt Buddy, settings
-  - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 12 screens, in normal and high-contrast mode
-- **API tests** (`npm test`) — validation, rate limiting, origin check, handler status codes.
+  - [`account_test.dart`](test/account_test.dart) — players: **a new account starts fresh and never sees the last player's levels**, switch player wipes progress from memory, account progress is never written to the device, guest game moves into a new account, cloud saves (bursts, retries, expired login), log out, delete account
+  - [`login_test.dart`](test/login_test.dart) — "Who's playing?" end to end: guest, sign up, play, switch player, a friend signs up and starts at zero, wrong password message, form checks
+  - [`accessibility_test.dart`](test/accessibility_test.dart) — Flutter accessibility guidelines (tap targets, labels, contrast) on all 13 screens plus the sign-up / log-in forms and account settings, in normal and high-contrast mode
+- **API tests** (`npm test`) — doubt solver: validation, rate limiting, origin check; **accounts** ([`api-tests/accounts.test.js`](api-tests/accounts.test.js)): two players can't see each other's progress, forged/tampered/expired sessions refused, password hashing, same answer for unknown email and wrong password, lockout, rate limits, CSRF/origin checks, nothing stored contains the email or password, delete removes everything.
 - **End-to-end:** the screenshot workflow plays the real web build in Chrome and fails on errors or CSP violations.
 - **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs analyze + tests + web build + Android APK build on every push.
 
@@ -165,18 +186,23 @@ To enable the AI tutor, add an environment variable in Vercel → Project → Se
 | `GEMINI_API_KEY` | your Google AI Studio key (keep it secret) |
 | `GEMINI_MODEL` *(optional)* | defaults to `gemini-2.5-flash` |
 
+**Player accounts** need a **private Vercel Blob store** connected to the project (Vercel → Storage → Create → Blob → access **Private** → connect to the project). Vercel adds `BLOB_READ_WRITE_TOKEN` by itself. The session and email-hashing secrets are created on the server the first time they are needed; you can also set your own (`SESSION_SECRET`, `ACCOUNT_ID_SECRET`, 32+ random characters each). Without a store, guest play still works and the app says accounts are unavailable.
+
 ## Project structure
 
 ```
 lib/
   data/          curriculum.dart (lessons & questions), builder_levels.dart (World Builder challenges), doubt_kb.dart (offline tutor), fun_facts.dart
-  logic/         builder.dart (World Builder engine: code in 4 syntaxes + step-by-step simulation), quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart, achievements.dart
+  logic/         builder.dart (World Builder engine: code in 4 syntaxes + step-by-step simulation), quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart, achievements.dart,
+                 session.dart (who is playing: guest / account), cloud_storage.dart (online saves)
   models/        models.dart
-  screens/       title, home hub, world map, lesson, world builder, battle, puzzle, results, trophy room, doubt buddy, settings, about (creator)
-  services/      doubt_service.dart (offline tutor + secure AI client)
+  screens/       title, who's playing (login), home hub, world map, lesson, world builder, battle, puzzle, results, trophy room, doubt buddy, settings, about (creator)
+  services/      doubt_service.dart (offline tutor + secure AI client), account_service.dart (accounts API client)
   theme/         app_theme.dart (normal + high contrast)
   widgets/       game_ui.dart (buttons, panels, HUD), scenes.dart (painted worlds), builder_stage.dart (side-scrolling stage + Byte), effects.dart (confetti, shake...)
-api/             ask.js (serverless AI endpoint), _lib/tutor.js (validation, rate limit)
+api/             ask.js (serverless AI endpoint), account.js (player accounts + cloud saves)
+api/_lib/        tutor.js (validation, rate limit), accounts.js (passwords, ids, sessions, progress checks),
+                 account-handler.js (routes), store.js (private Blob / memory), secrets.js, http.js
 api-tests/       Node tests for the API
 test/            Flutter unit, widget and accessibility tests
 tool/screenshots capture.mjs (plays the game, takes screenshots + video frames)
