@@ -1,5 +1,8 @@
 # 🦉 CodeQuest — Learn to Code by Playing
 
+> **Created by P Om Shiva** · M.Tech CSE (2nd year) · Pondicherry University
+> © 2026 P Om Shiva. **All rights reserved.** This is original work. Copying, reusing or republishing any part of it without written permission is not allowed — see [LICENSE](LICENSE).
+
 **CodeQuest** is a game that teaches **Python, C, C++ and Java** the way Mario and Pokémon keep you hooked: worlds to unlock, monsters to beat — and, best of all, **code that changes the world**. Your loop builds the bridge. Your variable sets the jump. A friendly **Doubt Buddy** answers your questions in simple words.
 
 Built with **Flutter** (one codebase for web + Android/iOS), deployed on **Vercel**.
@@ -9,6 +12,20 @@ Built with **Flutter** (one codebase for web + Android/iOS), deployed on **Verce
 ![Demo](docs/demo.gif)
 
 > Full-quality demo video: [docs/demo.mp4](docs/demo.mp4)
+
+---
+
+## ❤️ Why I made CodeQuest
+
+Too many students are afraid of programming. They see a screen full of brackets and semicolons, memorise programs just to pass the exam, and decide that coding is "not for them".
+
+**I made CodeQuest to prove that wrong.** Every student, from any school and any background, can learn to code when learning feels like playing instead of punishment.
+
+Here, a mistake is not a failure. A bug just makes Byte fall in the river — you see why, you fix it, and you try again. That is exactly how real programmers work every day.
+
+My dream is simple: **no student should ever give up on coding because it felt boring or scary.** Play, make mistakes, keep going. You are a coder.
+
+— **P Om Shiva**, M.Tech CSE (2nd year), Pondicherry University
 
 ---
 
@@ -66,8 +83,8 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | ![Trophies](docs/screenshots/12-trophies.png) | ![Doubt Buddy](docs/screenshots/13-doubt-buddy.png) | ![High contrast](docs/screenshots/14-high-contrast.png) |
 | **Mobile: title** | **Mobile: home** | **Mobile: map** |
 | ![Mobile title](docs/screenshots/15-mobile-title.png) | ![Mobile home](docs/screenshots/16-mobile-home.png) | ![Mobile map](docs/screenshots/17-mobile-map.png) |
-| **Mobile: World Builder** | | |
-| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | | |
+| **Mobile: World Builder** | **About: the creator and why I made this** | |
+| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | ![About](docs/screenshots/19-about.png) | |
 
 Screenshots and the demo video are made automatically by [a GitHub Action](.github/workflows/screenshots.yml) that plays the real game in headless Chrome ([tool/screenshots/capture.mjs](tool/screenshots/capture.mjs)).
 
@@ -155,7 +172,7 @@ lib/
   data/          curriculum.dart (lessons & questions), builder_levels.dart (World Builder challenges), doubt_kb.dart (offline tutor), fun_facts.dart
   logic/         builder.dart (World Builder engine: code in 4 syntaxes + step-by-step simulation), quiz_session.dart, puzzle_session.dart, scoring.dart, progress.dart, achievements.dart
   models/        models.dart
-  screens/       title, home hub, world map, lesson, world builder, battle, puzzle, results, trophy room, doubt buddy, settings
+  screens/       title, home hub, world map, lesson, world builder, battle, puzzle, results, trophy room, doubt buddy, settings, about (creator)
   services/      doubt_service.dart (offline tutor + secure AI client)
   theme/         app_theme.dart (normal + high contrast)
   widgets/       game_ui.dart (buttons, panels, HUD), scenes.dart (painted worlds), builder_stage.dart (side-scrolling stage + Byte), effects.dart (confetti, shake...)
@@ -165,7 +182,12 @@ test/            Flutter unit, widget and accessibility tests
 tool/screenshots capture.mjs (plays the game, takes screenshots + video frames)
 ```
 
-## Credits
-Made by **P Om Shiva** (M.Tech CSE, Pondicherry University).
-Fonts: Lilita One and Poppins (SIL OFL 1.1), DejaVu Sans Mono (Bitstream Vera license) — see `assets/fonts/`.
-Code licensed under the [MIT License](LICENSE).
+## Creator and copyright
+
+CodeQuest — its idea, game design, code, levels, characters and text — was created by **P Om Shiva**, M.Tech CSE (2nd year), Pondicherry University ([@omshiva24](https://github.com/omshiva24)).
+
+**© 2026 P Om Shiva. All rights reserved.** No licence is granted to copy, modify, publish, re-upload or present this work (or any part of it) as your own. Reviewing it for evaluation (for example by judges and faculty) and playing the published game are fine. For anything else, ask P Om Shiva for written permission. Full terms: [LICENSE](LICENSE).
+
+The creator's name is shown inside the game too: on the title screen, the home screen, Settings and the **About CodeQuest** screen ("Why I made this").
+
+Third-party parts keep their own licences: Flutter and Dart packages (BSD-3-Clause); fonts Lilita One and Poppins (SIL OFL 1.1) and DejaVu Sans Mono (Bitstream Vera licence) — see `assets/fonts/`.

@@ -1,11 +1,16 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
+import '../data/creator.dart';
 import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/game_ui.dart';
 import '../widgets/scenes.dart';
+import 'about_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -146,6 +151,17 @@ class SettingsScreen extends StatelessWidget {
                 style: TextStyle(height: 1.5),
               ),
             ),
+            section(
+              'About',
+              ButtonTone.gold,
+              Icons.info_rounded,
+              const Text(
+                'CodeQuest was created by $creatorName, $creatorDetails. $copyrightLine',
+                style: TextStyle(height: 1.5),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Center(child: CreatorCredit()),
             const SizedBox(height: 18),
             GameButton(
               tone: ButtonTone.coral,

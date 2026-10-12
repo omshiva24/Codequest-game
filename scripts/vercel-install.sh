@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+# All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
 # Installs a pinned Flutter SDK on the Vercel build machine (Vercel has no
 # Flutter preinstalled). Pinning the version keeps builds reproducible.
 set -euo pipefail

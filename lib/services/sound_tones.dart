@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 /// The "notes" behind every sound effect. Sounds are made in code by a tiny
 /// 8-bit style synthesizer, so the game ships no audio files at all.
 library;
