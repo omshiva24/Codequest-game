@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 // Checks Flutter's built-in accessibility guidelines on every main screen:
 // - tap targets are at least 48x48 (Android) / 44x44 (iOS)
 // - every tappable thing has a label for screen readers
@@ -11,6 +14,7 @@ import 'package:codequest/data/curriculum.dart';
 import 'package:codequest/logic/achievements.dart';
 import 'package:codequest/logic/progress.dart';
 import 'package:codequest/models/models.dart';
+import 'package:codequest/screens/about_screen.dart';
 import 'package:codequest/screens/achievements_screen.dart';
 import 'package:codequest/screens/battle_screen.dart';
 import 'package:codequest/screens/builder_screen.dart';
@@ -93,6 +97,7 @@ void main() {
     'puzzle': () => PuzzleScreen(level: levelById('cpp-3')!, random: Random(1)),
     'doubt buddy': () => const DoubtBuddyScreen(),
     'settings': () => const SettingsScreen(),
+    'about (creator)': () => const AboutScreen(),
   };
 
   testWidgets('app start (title screen) meets accessibility guidelines', (tester) async {

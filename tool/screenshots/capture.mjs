@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 // Plays through CodeQuest in a headless browser and saves screenshots plus
 // video frames. Used by .github/workflows/screenshots.yml.
 //
@@ -385,6 +388,14 @@ async function desktopShots() {
   await shot('14-high-contrast');
   await tap('High contrast');
 
+  // The creator's message ("Why I made this" on the title screen)
+  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
+  await locate('Play', { timeout: 60000, exact: true });
+  await sleep(800);
+  await tapScrolling('Why I made CodeQuest - a message from');
+  await locate('Why I made CodeQuest');
+  await sleep(900);
+  await shot('19-about');
 }
 
 /** Phone-size screens. */

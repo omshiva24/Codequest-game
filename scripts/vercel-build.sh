@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+# All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
 # Builds the Flutter web app into build/web for Vercel to serve.
 set -euo pipefail
 

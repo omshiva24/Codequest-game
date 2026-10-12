@@ -2,6 +2,8 @@
   "name": "codequest-api",
   "private": true,
   "description": "Serverless API for CodeQuest (AI Doubt Buddy). No runtime dependencies.",
+  "author": "P Om Shiva (M.Tech CSE, Pondicherry University)",
+  "license": "UNLICENSED",
   "type": "module",
   "engines": {
     "node": ">=20"
