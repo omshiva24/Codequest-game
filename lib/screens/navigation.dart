@@ -4,11 +4,11 @@ import '../app_scope.dart';
 import '../logic/progress.dart';
 import '../models/models.dart';
 import 'battle_screen.dart';
+import 'builder_screen.dart';
 import 'doubt_buddy_screen.dart';
 import 'lesson_screen.dart';
 import 'puzzle_screen.dart';
 import 'result_screen.dart';
-import 'runner_screen.dart';
 
 /// Something the player got wrong, shown on the results screen.
 class ReviewItem {
@@ -75,7 +75,7 @@ void openLesson(BuildContext context, Level level, {bool replace = false}) {
 /// Starts the right mini-game for [level], replacing the current screen.
 void startGame(BuildContext context, Level level) {
   final Widget page = switch (level.kind) {
-    LevelKind.runner => RunnerScreen(level: level),
+    LevelKind.builder => BuilderScreen(level: level),
     LevelKind.battle => BattleScreen(level: level),
     LevelKind.puzzle => PuzzleScreen(level: level),
   };

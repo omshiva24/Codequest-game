@@ -36,7 +36,7 @@ void main() {
       expect(s.missed.single.id, 'a');
     });
 
-    test('runner mode: running out of hearts ends the game', () {
+    test('running out of hearts ends the game', () {
       final s = QuizSession(_questions, random: Random(2), maxLives: 2);
       s.answer(_wrongIndex(s.current!));
       s.answer(_wrongIndex(s.current!));

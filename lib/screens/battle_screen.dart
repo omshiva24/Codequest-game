@@ -14,7 +14,6 @@ import '../widgets/effects.dart';
 import '../widgets/game_ui.dart';
 import '../widgets/scenes.dart';
 import 'navigation.dart';
-import 'runner_screen.dart' show fiftyFiftyCost;
 
 /// Pokémon-style battle: right answers fire a code bolt at the bug monster.
 class BattleScreen extends StatefulWidget {

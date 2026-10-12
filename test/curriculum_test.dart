@@ -32,11 +32,13 @@ void main() {
 
     test('quiz questions are well formed', () {
       for (final level in allLevels) {
-        if (level.kind == LevelKind.puzzle) continue;
+        if (level.kind != LevelKind.battle) {
+          expect(level.questions, isEmpty, reason: '${level.id} does not use quiz questions');
+          continue;
+        }
         expect(level.questions.length, greaterThanOrEqualTo(4), reason: level.id);
         for (final q in level.questions) {
-          final expectedOptions = level.kind == LevelKind.runner ? 3 : 4;
-          expect(q.options, hasLength(expectedOptions), reason: q.id);
+          expect(q.options, hasLength(4), reason: q.id);
           expect(q.options.toSet(), hasLength(q.options.length), reason: '${q.id} has duplicate options');
           expect(q.answer, inInclusiveRange(0, q.options.length - 1), reason: q.id);
           expect(q.prompt.trim(), isNotEmpty);
