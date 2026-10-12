@@ -88,10 +88,10 @@ Screenshots and the demo video are made automatically by [a GitHub Action](.gith
 See [SECURITY.md](SECURITY.md).
 
 ### ♿ Accessibility
-- **Screen readers:** every button, gate, move and block has a clear label; hearts, health and stars are read out ("2 of 3 hearts left"); feedback is announced with live regions. On the web, accessibility is switched on at start-up so screen readers work immediately.
-- **Full keyboard play:** Tab/Enter everywhere; Runner: ←/→ or 1–3 to change lane, Space to dash; Battle: 1–4 to attack.
-- **No timing pressure if you need it:** Runner timer can be Normal, Relaxed (2×) or Off (WCAG 2.2.1).
-- **Reduce motion** setting (and respects the device setting): stops the animated scenes, moving gates, shakes and confetti.
+- **Screen readers:** every button, blank, move and block has a clear label, and the World Builder stage is described in words ("Byte stands before a gap 5 blocks wide. The code has built 4 blocks."); hearts, health and stars are read out ("2 of 3 hearts left"); feedback is announced with live regions. On the web, accessibility is switched on at start-up so screen readers work immediately.
+- **Full keyboard play:** Tab/Enter everywhere; World Builder: number keys pick the value for the blank, R runs the code; Battle: 1–4 to attack.
+- **No timing pressure:** World Builder has no timer at all — think, run, fix, run again (WCAG 2.2.1).
+- **Reduce motion** setting (and respects the device setting): stops the animated scenes, shakes and confetti; in World Builder, Byte goes straight to the result.
 - **High-contrast mode** and **bigger text** (3 sizes, on top of the device text size).
 - Colour is never the only signal — right/wrong always also shows ✓/✗ icons and text.
 - Large touch targets (≥ 48 px), WCAG AA text contrast — **checked automatically** by tests on every screen in both normal and high-contrast themes.
