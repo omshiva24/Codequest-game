@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#0E1630",
   "theme_color": "#0E1630",
-  "description": "Learn Python, C, C++ and Java by playing runner, battle and puzzle mini-games.",
+  "description": "CodeQuest by P Om Shiva (M.Tech CSE, Pondicherry University). Learn Python, C, C++ and Java by playing. All rights reserved.",
   "orientation": "any",
   "prefer_related_applications": false,
   "categories": ["education", "games"],

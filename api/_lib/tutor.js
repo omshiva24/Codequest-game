@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 // Pure helpers for the AI doubt-solver endpoint. Kept separate from the
 // handler so they can be unit-tested with `node --test` (no network needed).
 // Files in api/_lib are not deployed as their own endpoints on Vercel.

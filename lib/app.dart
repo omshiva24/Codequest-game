@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 import 'package:flutter/material.dart';
 
 import 'app_scope.dart';
@@ -28,7 +31,7 @@ class CodeQuestApp extends StatelessWidget {
           final settings = controller.settings;
           SoundFx.enabled = settings.soundOn;
           return MaterialApp(
-            title: 'CodeQuest - Learn to Code by Playing',
+            title: 'CodeQuest by P Om Shiva - Learn to Code by Playing',
             debugShowCheckedModeBanner: false,
             theme: buildTheme(highContrast: settings.highContrast),
             themeAnimationDuration:

@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 /// World Builder: the code you write changes the world.
 ///
 /// Each challenge is a tiny program with one blank. The player fills the

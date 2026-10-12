@@ -1,21 +1,38 @@
-MIT License
+CodeQuest - Learn to Code by Playing
+Copyright (c) 2026 P Om Shiva. All rights reserved.
 
-Copyright (c) 2026 P Om Shiva
+Created by P Om Shiva, M.Tech CSE (2nd year), Pondicherry University.
+GitHub: https://github.com/omshiva24
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software - including its source code, game design, levels, puzzles,
+characters, artwork, sound design, text and documentation (together,
+"CodeQuest") - is the original work of P Om Shiva and is protected by
+copyright law.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+NO LICENCE IS GRANTED. Without prior written permission from P Om Shiva, you
+may NOT:
+  - copy, download for reuse, modify or adapt CodeQuest or any part of it;
+  - publish, re-upload, host, distribute, sell or sublicense it;
+  - submit it, or work based on it, to any competition, course, hackathon or
+    project, or present it as your own work.
+
+What is allowed:
+  - Playing the published game for personal learning.
+  - Reviewing the code and the game for evaluation (for example, by competition
+    judges and university faculty).
+  - Viewing and forking this repository on GitHub, only to the extent GitHub's
+    Terms of Service require for public repositories. This gives no right to
+    use, copy or publish CodeQuest anywhere else.
+
+To ask for permission, contact P Om Shiva through GitHub:
+https://github.com/omshiva24
+
+Third-party parts keep their own licences:
+  - Flutter, Dart and the Dart packages used: BSD-3-Clause (see each package).
+  - Fonts in assets/fonts: see the licence files in that folder (SIL Open Font
+    License 1.1 for Poppins and Lilita One; Bitstream Vera / DejaVu licence for
+    DejaVu Sans Mono).
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.

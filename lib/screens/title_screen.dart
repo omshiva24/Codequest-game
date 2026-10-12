@@ -1,3 +1,6 @@
+// CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
+// All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -7,6 +10,7 @@ import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/game_ui.dart';
 import '../widgets/scenes.dart';
+import 'about_screen.dart';
 import 'home_screen.dart';
 import 'navigation.dart';
 
@@ -73,6 +77,8 @@ class TitleScreen extends StatelessWidget {
                         'Your progress is saved on this device.',
                         style: TextStyle(color: g.onNightDim, fontSize: 14),
                       ),
+                      const SizedBox(height: 22),
+                      const CreatorCredit(showCopyright: true),
                     ],
                   ),
                 ),
