@@ -103,6 +103,7 @@ void main() {
     expect(credit, findsOneWidget);
     await tester.tap(find.byTooltip('Settings and accessibility'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.byType(CreatorCredit), 300);
     expect(find.byType(CreatorCredit), findsOneWidget);
   });
 
