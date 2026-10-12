@@ -103,11 +103,15 @@ async function locate(text, { timeout = 15000, exact = false } = {}) {
   while (Date.now() < end) {
     const hit = await page.evaluate(
       (needle, exactMatch) => {
-        let best = null;
-        for (const el of document.querySelectorAll('flt-semantics, [role], [aria-label]')) {
+        const matches = [...document.querySelectorAll('flt-semantics, [role], [aria-label]')].filter((el) => {
           const label = (el.getAttribute('aria-label') || el.textContent || '').trim();
-          const ok = exactMatch ? label === needle : label.includes(needle);
-          if (!ok) continue;
+          return exactMatch ? label === needle : label.includes(needle);
+        });
+        // A container's textContent includes its children's text, so only the
+        // innermost match is the real target (e.g. a button, not the page).
+        const innermost = matches.filter((el) => !matches.some((o) => o !== el && el.contains(o)));
+        let best = null;
+        for (const el of innermost) {
           const r = el.getBoundingClientRect();
           if (r.width < 2 || r.height < 2 || r.bottom < 0 || r.top > innerHeight) continue;
           const area = r.width * r.height;
@@ -402,6 +406,7 @@ async function phoneShots() {
   await tapScrolling('Level 1: Hello, C!');
   await sleep(600);
   await tapScrolling('Start World Builder');
+  await locate('Run code'); // make sure the game really opened
   await sleep(1500);
   await shot('18-mobile-builder');
 }
