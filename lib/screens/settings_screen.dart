@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
-import '../logic/progress.dart';
 import '../services/sound.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
@@ -80,7 +79,7 @@ class SettingsScreen extends StatelessWidget {
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text('Reduce motion', style: displayStyle(20, color: g.ink)),
-                    subtitle: Text('Stops moving scenes, gates, shakes and confetti.', style: subtitleStyle),
+                    subtitle: Text('Stops moving scenes, shakes and confetti. Byte jumps straight to the result.', style: subtitleStyle),
                     value: settings.reduceMotion,
                     onChanged: (v) => progress.updateSettings(settings.copyWith(reduceMotion: v)),
                   ),
@@ -125,32 +124,13 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             section(
-              'Runner timer',
-              ButtonTone.gold,
-              Icons.timer_rounded,
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SegmentedButton<TimerMode>(
-                    segments: [
-                      for (final mode in TimerMode.values) ButtonSegment(value: mode, label: Text(mode.label)),
-                    ],
-                    selected: {settings.timerMode},
-                    onSelectionChanged: (s) => progress.updateSettings(settings.copyWith(timerMode: s.first)),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(settings.timerMode.description, style: subtitleStyle),
-                ],
-              ),
-            ),
-            section(
               'Keyboard controls',
               ButtonTone.mint,
               Icons.keyboard_rounded,
               const Text(
                 'Tab / Shift+Tab: move between buttons\n'
                 'Enter or Space: press the focused button\n'
-                'Code Runner: arrow keys or 1-3 change lane, Space dashes\n'
+                'World Builder: 1-7 fill the blank, R runs the code\n'
                 'Bug Battle: 1-4 pick a move',
                 style: TextStyle(height: 1.6),
               ),

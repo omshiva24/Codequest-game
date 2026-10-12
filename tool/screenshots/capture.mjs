@@ -103,11 +103,15 @@ async function locate(text, { timeout = 15000, exact = false } = {}) {
   while (Date.now() < end) {
     const hit = await page.evaluate(
       (needle, exactMatch) => {
-        let best = null;
-        for (const el of document.querySelectorAll('flt-semantics, [role], [aria-label]')) {
+        const matches = [...document.querySelectorAll('flt-semantics, [role], [aria-label]')].filter((el) => {
           const label = (el.getAttribute('aria-label') || el.textContent || '').trim();
-          const ok = exactMatch ? label === needle : label.includes(needle);
-          if (!ok) continue;
+          return exactMatch ? label === needle : label.includes(needle);
+        });
+        // A container's textContent includes its children's text, so only the
+        // innermost match is the real target (e.g. a button, not the page).
+        const innermost = matches.filter((el) => !matches.some((o) => o !== el && el.contains(o)));
+        let best = null;
+        for (const el of innermost) {
           const r = el.getBoundingClientRect();
           if (r.width < 2 || r.height < 2 || r.bottom < 0 || r.top > innerHeight) continue;
           const area = r.width * r.height;
@@ -163,8 +167,11 @@ async function shot(name) {
   console.log('saved', name);
 }
 
-async function scroll(dy) {
-  await page.mouse.move(640, 500);
+async function scroll(dy, x) {
+  // Scroll inside the window: phones are much narrower than desktops.
+  const view = page.viewport() ?? { width: 1280, height: 860 };
+  const px = Math.min(x ?? view.width / 2, view.width - 10);
+  await page.mouse.move(px, Math.min(500, view.height / 2));
   await page.mouse.wheel({ deltaY: dy });
   await sleep(600);
 }
@@ -178,7 +185,8 @@ async function tapScrolling(text, opts = {}) {
       await sleep(700);
       return;
     }
-    await scroll(450);
+    // Wide screens have two scrolling columns; try both.
+    await scroll(450, i % 2 === 0 ? undefined : 1000);
   }
   throw new Error(`Could not scroll to "${text}"`);
 }
@@ -217,11 +225,11 @@ async function goHome() {
 }
 
 // The right answers for the Python world (options are shuffled in game).
-const runnerAnswers = ['print("Hi")', '5', '#', 'HiHiHi', 'Indentation'];
 const battleAnswers = ["<class 'str'>", 'my_score', '15', 'float', 'Hi Om'];
 const puzzleLines = ['age = 20', 'if age >= 18:', 'print("Adult")', 'else:', 'print("Kid")'];
 
-try {
+/** Desktop-size play-through: every game mode, results, trophies, settings. */
+async function desktopShots() {
   await page.setViewport({ width: 1280, height: 860, deviceScaleFactor: 1 });
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
   await locate('Play', { timeout: 60000, exact: true });
@@ -246,17 +254,54 @@ try {
   await sleep(1400);
   await shot('03-lesson');
 
-  // Runner game
-  await tapScrolling('Start Code Runner');
-  await sleep(2200);
-  await shot('04-runner');
-  for (let i = 0; i < runnerAnswers.length; i++) {
-    await tap(`: ${runnerAnswers[i]}`, { exact: false });
-    await tap('Run through gate');
-    if (i === 0) await shot('05-runner-correct');
-    await tapScrolling(i === runnerAnswers.length - 1 ? 'See results' : 'Next gate');
-    await sleep(600);
-  }
+  // World Builder: your code builds the world.
+  await tapScrolling('Start World Builder');
+  await sleep(2000);
+  await shot('04-builder');
+
+  // 1. The guard wants the password: print it as a string.
+  await tap('Put "HELLO" in the blank');
+  await tap('Run code');
+  await sleep(500);
+  await shot('05-builder-password');
+  await tapScrolling('Next challenge', { timeout: 8000 });
+  await sleep(1200);
+
+  // 2. Jump: a variable sets the height. Byte lands and celebrates on top.
+  await tap('Put 2 in the blank');
+  await tap('Run code');
+  await locate('Byte landed on the ledge', { timeout: 12000 });
+  await sleep(300);
+  await shot('05b-builder-jump');
+  await tapScrolling('Next challenge', { timeout: 8000 });
+  await sleep(1200);
+
+  // 3. Bridge: a bug on purpose - one block short - then the fix.
+  await tap('Put 2 in the blank');
+  // Click Run without the usual pause, so the fall can be timed from the
+  // moment the last plank appears.
+  const runButton = await locateStable('Run code');
+  await page.mouse.click(runButton.x, runButton.y);
+  // Once the 4th (last) plank is down, Byte walks out and falls. Catch the fall.
+  await locate('The code has built 4 blocks', { timeout: 12000 });
+  await sleep(1150);
+  await shot('05c-builder-fall');
+  await locate('Try again', { timeout: 8000 });
+  await sleep(600);
+  await shot('05d-builder-bug');
+  await tapScrolling('Try again');
+  await tap('Put 3 in the blank');
+  await tap('Run code');
+  await locate('Byte made it through', { timeout: 12000 });
+  await sleep(300);
+  await shot('05e-builder-bridge');
+  await tapScrolling('Next challenge', { timeout: 8000 });
+  await sleep(1200);
+
+  // 4. Maths in a variable: ? - 1 = 3.
+  await tap('Put 4 in the blank');
+  await tap('Run code');
+  await tapScrolling('See results', { timeout: 8000 });
   await sleep(1800);
   await shot('06-results');
 
@@ -340,6 +385,10 @@ try {
   await shot('14-high-contrast');
   await tap('High contrast');
 
+}
+
+/** Phone-size screens. */
+async function phoneShots() {
   // Phone size
   recording = false;
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -354,6 +403,18 @@ try {
   await tap('C Caves.');
   await sleep(900);
   await shot('17-mobile-map');
+  await tapScrolling('Level 1: Hello, C!');
+  await sleep(600);
+  await tapScrolling('Start World Builder');
+  await locate('Run code'); // make sure the game really opened
+  await sleep(1500);
+  await shot('18-mobile-builder');
+}
+
+try {
+  // ONLY_PHONE=1 skips the long desktop play-through (handy when debugging).
+  if (!process.env.ONLY_PHONE) await desktopShots();
+  await phoneShots();
 } catch (err) {
   console.error('Capture failed:', err.message);
   await page.screenshot({ path: join(OUT, 'zz-error.png') }).catch(() => {});

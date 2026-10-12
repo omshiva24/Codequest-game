@@ -15,6 +15,9 @@ enum Sfx {
   defeat,
   levelUp,
   badge,
+  block,
+  jump,
+  fall,
 }
 
 /// One beep: a frequency (Hz) played for [duration] seconds.
@@ -94,6 +97,10 @@ const Map<Sfx, List<Tone>> sfxTones = {
     Tone(_e6, 0.06),
     Tone(_g6, 0.22),
   ],
+  // World Builder: a block thunks into place, Byte jumps, Byte falls.
+  Sfx.block: [Tone(150, 0.07, slideTo: 90, volume: 0.07), Tone(_g4, 0.04, wave: 'triangle', volume: 0.04)],
+  Sfx.jump: [Tone(300, 0.16, wave: 'triangle', slideTo: 760, volume: 0.06)],
+  Sfx.fall: [Tone(880, 0.55, wave: 'triangle', slideTo: 140, volume: 0.06)],
   Sfx.badge: [
     Tone(_a5, 0.08, wave: 'triangle', volume: 0.07),
     Tone(_d6, 0.08, wave: 'triangle', volume: 0.07),

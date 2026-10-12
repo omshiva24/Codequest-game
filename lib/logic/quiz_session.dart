@@ -27,7 +27,7 @@ class AnswerResult {
   String get chosenText => question.options[chosenIndex];
 }
 
-/// Game rules shared by the runner and battle mini-games.
+/// Rules for the battle mini-game (and any other quiz-style game).
 ///
 /// * Each wrong answer costs one heart.
 /// * With [requeueWrong] (battle mode) a missed question comes back at the

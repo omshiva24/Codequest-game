@@ -42,8 +42,8 @@ class TitleScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          'Learn to code by playing. Run, battle and build your way '
-                          'through four worlds.',
+                          'Learn to code by playing. Your code builds bridges, beats '
+                          'bugs and opens gates in four worlds.',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: g.onNight, fontSize: 17, height: 1.4),
                         ),

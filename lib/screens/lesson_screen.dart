@@ -25,7 +25,7 @@ class LessonScreen extends StatelessWidget {
   }
 
   ButtonTone get _kindTone => switch (level.kind) {
-        LevelKind.runner => ButtonTone.sky,
+        LevelKind.builder => ButtonTone.sky,
         LevelKind.battle => ButtonTone.coral,
         LevelKind.puzzle => ButtonTone.lilac,
       };

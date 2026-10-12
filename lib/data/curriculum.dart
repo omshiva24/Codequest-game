@@ -24,13 +24,13 @@ Question _q(
 // PYTHON JUNGLE
 // ---------------------------------------------------------------------------
 final List<Level> _python = [
-  Level(
+  const Level(
     id: 'py-1',
     lang: Lang.python,
     number: 1,
     title: 'Hello, Python!',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Talking to the computer',
       story: 'A program is a list of instructions. In Python, print() shows a '
           'message on the screen. Text goes inside quotes. Python does maths '
@@ -44,24 +44,9 @@ print(2 + 3)''',
         'Text (a "string") goes inside quotes.',
         '# starts a comment. Python ignores it.',
         'Python uses indentation (spaces) to group code.',
+        'A variable is a named box: jump_height = 3 stores 3.',
       ],
     ),
-    questions: [
-      _q('py-1-1', 'Which line shows text on the screen?',
-          ['print("Hi")', 'echo "Hi"', 'show("Hi")'],
-          'print() is the Python command for showing output.'),
-      _q('py-1-2', 'What does this show?', ['5', '2 + 3', '23'],
-          'Without quotes, Python calculates 2 + 3 first, then prints 5.',
-          code: 'print(2 + 3)'),
-      _q('py-1-3', 'A comment in Python starts with...', ['#', '//', '--'],
-          'Python comments start with #. (// is used in C, C++ and Java.)'),
-      _q('py-1-4', 'What does this show?', ['HiHiHi', 'Hi3', 'Error'],
-          'Multiplying a string by a number repeats it.',
-          code: 'print("Hi" * 3)'),
-      _q('py-1-5', 'Python groups code blocks using...',
-          ['Indentation', '{ } braces', 'begin / end'],
-          'Python uses spaces at the start of lines (indentation) instead of braces.'),
-    ],
   ),
   Level(
     id: 'py-2',
@@ -176,13 +161,13 @@ else:
       ),
     ],
   ),
-  Level(
+  const Level(
     id: 'py-4',
     lang: Lang.python,
     number: 4,
-    title: 'Loop Run',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    title: 'Loop Bridges',
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Doing things again and again',
       story: 'Loops repeat code so you do not have to copy it. A for loop goes '
           'through each item in a sequence. range(3) gives 0, 1, 2 - it starts '
@@ -202,23 +187,6 @@ while count > 0:
         'break exits the loop. continue skips to the next round.',
       ],
     ),
-    questions: [
-      _q('py-4-1', 'What does this print?', ['0 1 2', '1 2 3', '0 1 2 3'],
-          'range(3) starts at 0 and stops before 3.',
-          code: 'for i in range(3):\n    print(i)'),
-      _q('py-4-2', 'Which numbers does range(1, 5) give?',
-          ['1 2 3 4', '1 2 3 4 5', '0 1 2 3 4'],
-          'The start is included but the end (5) is not.'),
-      _q('py-4-3', 'Which loop repeats while a condition is True?',
-          ['while', 'if', 'def'],
-          'while keeps looping as long as its condition stays True.'),
-      _q('py-4-4', 'What does break do inside a loop?',
-          ['Exits the loop', 'Skips one round', 'Restarts it'],
-          'break stops the loop completely. continue only skips the current round.'),
-      _q('py-4-5', 'How many times does this loop run?', ['3', '1', '4'],
-          'A for loop over a string visits each character: a, b, c.',
-          code: 'for c in "abc":\n    print(c)'),
-    ],
   ),
   Level(
     id: 'py-5',
@@ -275,13 +243,13 @@ greet()         # Hi friend''',
 // C CAVES
 // ---------------------------------------------------------------------------
 final List<Level> _c = [
-  Level(
+  const Level(
     id: 'c-1',
     lang: Lang.c,
     number: 1,
     title: 'Hello, C!',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Your first C program',
       story: 'Every C program starts running from main(). To print, we use '
           'printf, which lives in the stdio.h library - so we #include it at '
@@ -299,23 +267,9 @@ int main() {
         'The program starts at main().',
         'Statements end with ;',
         r'\n makes a new line. // starts a comment.',
+        'A variable stores a value: int jump_height = 3;',
       ],
     ),
-    questions: [
-      _q('c-1-1', 'Which function prints text in C?', ['printf', 'print', 'echo'],
-          'printf (print formatted) comes from stdio.h.'),
-      _q('c-1-2', 'Every C statement ends with...', [';', '.', ':'],
-          'The semicolon tells the compiler where a statement ends.'),
-      _q('c-1-3', 'A C program starts running from...',
-          ['main()', 'start()', 'Line 1'],
-          'main() is the entry point of every C program.'),
-      _q('c-1-4', r'What does \n mean inside printf?',
-          ['New line', 'A space', 'The letter n'],
-          r'\n is an "escape sequence" that moves output to the next line.'),
-      _q('c-1-5', 'To use printf you must include...',
-          ['stdio.h', 'math.h', 'string.h'],
-          'stdio.h = standard input/output, home of printf and scanf.'),
-    ],
   ),
   Level(
     id: 'c-2',
@@ -433,13 +387,13 @@ if (t > 35) {
       ),
     ],
   ),
-  Level(
+  const Level(
     id: 'c-4',
     lang: Lang.c,
     number: 4,
-    title: 'Loop Run',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    title: 'Loop Bridges',
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Round and round',
       story: 'A for loop has three parts: start; condition; step. i++ means '
           '"add 1 to i". A while loop checks its condition before each round. '
@@ -460,22 +414,6 @@ while (n > 0) {
         'continue skips to the next round, break exits.',
       ],
     ),
-    questions: [
-      _q('c-4-1', 'How many times does this loop run?', ['3', '2', '4'],
-          'i takes the values 0, 1 and 2. When i becomes 3, i < 3 is false.',
-          code: 'for (int i = 0; i < 3; i++)'),
-      _q('c-4-2', 'What does i++ do?', ['Adds 1 to i', 'Doubles i', 'Prints i'],
-          '++ is the increment operator.'),
-      _q('c-4-3', 'Which loop checks AFTER running once?',
-          ['do-while', 'while', 'for'],
-          'do-while runs the body first, then checks the condition.'),
-      _q('c-4-4', 'How many times does the body run?', ['0', '5', 'Forever'],
-          'i > 5 is false at the start (5 is not greater than 5), so the body never runs.',
-          code: 'int i = 5;\nwhile (i > 5) { i--; }'),
-      _q('c-4-5', 'What does continue do?',
-          ['Skips to next round', 'Exits the loop', 'Stops program'],
-          'continue jumps straight to the next round of the loop.'),
-    ],
   ),
   Level(
     id: 'c-5',
@@ -535,13 +473,13 @@ int add(int a, int b) {
 // C++ CASTLE
 // ---------------------------------------------------------------------------
 final List<Level> _cpp = [
-  Level(
+  const Level(
     id: 'cpp-1',
     lang: Lang.cpp,
     number: 1,
     title: 'Hello, C++!',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Streams of text',
       story: 'C++ is C with super-powers. To print, send text into cout with '
           'the << arrows, like pouring water into a cup. endl ends the line. '
@@ -561,23 +499,9 @@ int main() {
         'cout << prints, cin >> reads input.',
         'endl ends the line.',
         'Statements end with ;',
+        'A variable stores a value: int jumpHeight = 3;',
       ],
     ),
-    questions: [
-      _q('cpp-1-1', 'Which line prints in C++?',
-          ['cout << "Hi";', 'print("Hi")', 'echo "Hi"'],
-          'cout with << sends output to the screen.'),
-      _q('cpp-1-2', 'What does endl do?', ['Ends the line', 'Ends the program', 'Adds a comment'],
-          'endl moves to a new line (and flushes the output).'),
-      _q('cpp-1-3', 'Which header gives you cout?',
-          ['<iostream>', '<stdio>', '<cout>'],
-          'iostream = input/output streams.'),
-      _q('cpp-1-4', 'How do you read user input?', ['cin >> x;', 'cout << x;', 'input(x)'],
-          'cin with >> reads a value into a variable.'),
-      _q('cpp-1-5', 'What does this show?', ['5', '2 + 3', '23'],
-          'C++ calculates 2 + 3 first, then prints 5.',
-          code: 'cout << 2 + 3;'),
-    ],
   ),
   Level(
     id: 'cpp-2',
@@ -685,13 +609,13 @@ if (score >= 90) {
       ),
     ],
   ),
-  Level(
+  const Level(
     id: 'cpp-4',
     lang: Lang.cpp,
     number: 4,
-    title: 'Loop Run',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    title: 'Loop Bridges',
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Marching through vectors',
       story: 'C++ has the same for and while loops as C. It also has a '
           'range-based for loop that visits every item of a container like a '
@@ -712,22 +636,6 @@ cout << nums.size();       // 4''',
         'while (true) needs a break to stop.',
       ],
     ),
-    questions: [
-      _q('cpp-4-1', 'What does for (int x : nums) do?',
-          ['Visits each item', 'Counts to x', 'Sorts nums'],
-          'The range-based for loop gives you each element one by one.'),
-      _q('cpp-4-2', 'What does this print?', ['123', '012', '1234'],
-          'i starts at 1 and the loop runs while i <= 3.',
-          code: 'for (int i = 1; i <= 3; i++)\n    cout << i;'),
-      _q('cpp-4-3', 'while (true) with no break runs...',
-          ['Forever', 'Once', 'Never'],
-          'The condition is always true, so it is an infinite loop.'),
-      _q('cpp-4-4', 'Which is a list that can grow?', ['vector', 'int', 'char'],
-          'vector is a dynamic array that can grow and shrink.'),
-      _q('cpp-4-5', 'What does v.size() give?',
-          ['Number of items', 'The last item', 'Memory address'],
-          'size() returns how many elements are in the vector.'),
-    ],
   ),
   Level(
     id: 'cpp-5',
@@ -785,13 +693,13 @@ d.bark();   // Rex: Woof!''',
 // JAVA VOLCANO
 // ---------------------------------------------------------------------------
 final List<Level> _java = [
-  Level(
+  const Level(
     id: 'java-1',
     lang: Lang.java,
     number: 1,
     title: 'Hello, Java!',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Everything lives in a class',
       story: 'In Java, all code lives inside a class. The program starts in '
           'the main method. System.out.println prints a line of text and then '
@@ -808,24 +716,9 @@ final List<Level> _java = [
         'The program starts in main.',
         'println prints and adds a new line.',
         'Statements end with ;',
+        'A variable stores a value: int jumpHeight = 3;',
       ],
     ),
-    questions: [
-      _q('java-1-1', 'Which line prints in Java?',
-          ['System.out.println("Hi");', 'print("Hi")', 'echo "Hi"'],
-          'System.out.println is Java\'s print command.'),
-      _q('java-1-2', 'Java code must live inside a...', ['class', 'folder', 'loop'],
-          'Java is object-oriented: every method belongs to a class.'),
-      _q('java-1-3', 'A Java program starts running in...',
-          ['main method', 'first class', 'start()'],
-          'public static void main(String[] args) is the entry point.'),
-      _q('java-1-4', 'Compared with print, println also adds...',
-          ['A new line', 'A space', 'Nothing'],
-          'println = print line. It moves to the next line after printing.'),
-      _q('java-1-5', 'public class Main must be saved as...',
-          ['Main.java', 'main.txt', 'Program.java'],
-          'The file name must match the public class name.'),
-    ],
   ),
   Level(
     id: 'java-2',
@@ -930,13 +823,13 @@ if (n > 0) {
       ),
     ],
   ),
-  Level(
+  const Level(
     id: 'java-4',
     lang: Lang.java,
     number: 4,
-    title: 'Loop Run',
-    kind: LevelKind.runner,
-    lesson: const Lesson(
+    title: 'Loop Bridges',
+    kind: LevelKind.builder,
+    lesson: Lesson(
       title: 'Lava laps',
       story: 'Java loops work like C loops. Arrays store many values of the '
           'same type, and their index starts at 0. The enhanced for loop '
@@ -955,22 +848,6 @@ for (int n : nums) {        // enhanced for
         'do-while runs at least once.',
       ],
     ),
-    questions: [
-      _q('java-4-1', 'How many times does this loop run?', ['4', '3', '5'],
-          'i goes 0, 1, 2, 3 - that is 4 rounds.',
-          code: 'for (int i = 0; i < 4; i++)'),
-      _q('java-4-2', 'What does for (int n : nums) do?',
-          ['Visits each item', 'Counts to n', 'Makes an array'],
-          'The enhanced for loop walks through every element.'),
-      _q('java-4-3', 'What is i at the end?', ['1', '0', '-1'],
-          'do-while runs once (i becomes 1) before checking i < 0, which is false.',
-          code: 'int i = 0;\ndo { i++; } while (i < 0);'),
-      _q('java-4-4', 'Array index starts at...', ['0', '1', '-1'],
-          'The first element is arr[0].'),
-      _q('java-4-5', 'What does break do?',
-          ['Exits the loop', 'Skips a round', 'Ends program'],
-          'break leaves the loop immediately.'),
-    ],
   ),
   Level(
     id: 'java-5',
