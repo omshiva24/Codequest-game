@@ -391,6 +391,11 @@ try {
   await tap('C Caves.');
   await sleep(900);
   await shot('17-mobile-map');
+  await tapScrolling('Level 1: Hello, C!');
+  await sleep(600);
+  await tapScrolling('Start World Builder');
+  await sleep(1500);
+  await shot('18-mobile-builder');
 } catch (err) {
   console.error('Capture failed:', err.message);
   await page.screenshot({ path: join(OUT, 'zz-error.png') }).catch(() => {});
