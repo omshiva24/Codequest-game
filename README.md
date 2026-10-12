@@ -56,8 +56,8 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | ![Title](docs/screenshots/00-title.png) | ![Home](docs/screenshots/01-home.png) | ![World map](docs/screenshots/02-world-map.png) |
 | **Lesson with Byte** | **World Builder: say the password** | **The gate opens** |
 | ![Lesson](docs/screenshots/03-lesson.png) | ![World Builder](docs/screenshots/04-builder.png) | ![Password](docs/screenshots/05-builder-password.png) |
-| **A variable sets the jump** | **Bug! One block short...** | **Byte explains the bug** |
-| ![Jump](docs/screenshots/05b-builder-jump.png) | ![Fall](docs/screenshots/05c-builder-fall.png) | ![Bug](docs/screenshots/05d-builder-bug.png) |
+| **A variable sets the jump** | **Bug! One block short - Byte falls in** | **Bug fixed: a perfect bridge** |
+| ![Jump](docs/screenshots/05b-builder-jump.png) | ![Bug](docs/screenshots/05d-builder-bug.png) | ![Bridge](docs/screenshots/05e-builder-bridge.png) |
 | **Level clear** | **Bug Battle** | **Code bolt attack** |
 | ![Results](docs/screenshots/06-results.png) | ![Battle](docs/screenshots/07-battle.png) | ![Attack](docs/screenshots/08-battle-attack.png) |
 | **Learning from a miss** | **Block Builder** | **Run code: console output** |
@@ -66,6 +66,8 @@ Stuck? Ask Byte the owl anything, like "What is a pointer in C?", "for vs while?
 | ![Trophies](docs/screenshots/12-trophies.png) | ![Doubt Buddy](docs/screenshots/13-doubt-buddy.png) | ![High contrast](docs/screenshots/14-high-contrast.png) |
 | **Mobile: title** | **Mobile: home** | **Mobile: map** |
 | ![Mobile title](docs/screenshots/15-mobile-title.png) | ![Mobile home](docs/screenshots/16-mobile-home.png) | ![Mobile map](docs/screenshots/17-mobile-map.png) |
+| **Mobile: World Builder** | | |
+| ![Mobile World Builder](docs/screenshots/18-mobile-builder.png) | | |
 
 Screenshots and the demo video are made automatically by [a GitHub Action](.github/workflows/screenshots.yml) that plays the real game in headless Chrome ([tool/screenshots/capture.mjs](tool/screenshots/capture.mjs)).
 
