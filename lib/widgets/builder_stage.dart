@@ -58,14 +58,24 @@ class StageScene {
 
 /// The painted side-scrolling world for one challenge, with Byte in it.
 class BuilderStage extends StatelessWidget {
-  const BuilderStage({super.key, required this.scene, required this.description});
+  const BuilderStage({
+    super.key,
+    required this.scene,
+    required this.description,
+    this.aspect = defaultAspect,
+  });
 
   final StageScene scene;
 
   /// What a screen reader announces about the picture.
   final String description;
 
-  static const double aspect = 2;
+  /// Width divided by height. Smaller = taller stage with more sky.
+  final double aspect;
+
+  static const double defaultAspect = 1.7;
+  static const double minAspect = 1.45;
+  static const double maxAspect = 2.0;
 
   @override
   Widget build(BuildContext context) {
@@ -224,9 +234,23 @@ class StageGeometry {
   final double width;
   final double height;
 
-  double get ground => tile * 5.7;
+  /// Byte's height from feet to the top of his head, in tiles.
+  static const double heroHeight = 1.84;
+
+  /// Free space between the ledge top and the spiky ceiling, in tiles. Byte
+  /// (plus a little victory hop) fits under it, but one block more does not.
+  static const double ceilingGap = 2.6;
+
+  /// The ground strip is always 1.3 tiles deep; a taller stage adds sky.
+  double get ground => height - tile * 1.3;
   double x(num column) => column * tile;
   double above(num blocks) => ground - blocks * tile;
+
+  /// Where the spikes start above a ledge [blocks] high.
+  double ceilingBottom(num blocks) => above(blocks + ceilingGap);
+
+  /// Where Byte walks to (and celebrates) after a success. He stays in view.
+  double get finishX => x(12.2);
 }
 
 enum HeroAction { stand, walk, jump, fall, bonk }
@@ -288,7 +312,7 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
   final t = geo.tile;
   final startX = geo.x(2.4);
   final ground = geo.ground;
-  final offStage = geo.x(15.5);
+  final endX = geo.finishX;
 
   if (s.enter < 1) {
     return HeroPose(
@@ -312,6 +336,26 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
         stride: phase * 16,
       );
 
+  // Success: walk to the far side, then two happy hops (stays on screen).
+  HeroPose walkThenCheer(double fromX, double y, double phase) {
+    if (phase < 0.75) {
+      final u = phase / 0.75;
+      return HeroPose(
+        x: _lerp(fromX, endX, u),
+        y: y,
+        action: u > 0 ? HeroAction.walk : HeroAction.stand,
+        stride: u * 16,
+      );
+    }
+    final u = _seg(phase, 0.75, 1);
+    final hop = math.sin(u * math.pi * 2).abs();
+    return HeroPose(
+      x: endX,
+      y: y - hop * t * 0.3,
+      action: u > 0 && u < 1 && hop > 0.05 ? HeroAction.jump : HeroAction.stand,
+    );
+  }
+
   HeroPose knockBack(double fromX, double y, double u, {double dropTo = -1}) => HeroPose(
         x: fromX - t * 0.8 * u,
         y: (dropTo < 0 ? y : _lerp(y, dropTo, u)) - math.sin(u * math.pi) * t * 0.5,
@@ -324,7 +368,7 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
     case Obstacle.gap:
       final gap = s.size;
       if (outcome == BuildOutcome.cross) {
-        return walkTo(offStage, ground, a);
+        return walkThenCheer(startX, ground, a);
       }
       if (outcome == BuildOutcome.trip) {
         final stopX = geo.x(5 + gap) - t * 0.55;
@@ -353,16 +397,16 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
           final u = _seg(a, 0.12, 0.62);
           return HeroPose(
             x: _lerp(startX, geo.x(7.3), u),
-            y: _lerp(ground, top, u) - math.sin(u * math.pi) * t * 1.0,
+            y: _lerp(ground, top, u) - math.sin(u * math.pi) * t * 0.35,
             action: HeroAction.jump,
           );
         }
-        return walkTo(offStage, top, _seg(a, 0.62, 1), fromX: geo.x(7.3));
+        return walkThenCheer(geo.x(7.3), top, _seg(a, 0.62, 1));
       }
       if (outcome == BuildOutcome.error) return _confused(startX, ground, a, t);
       final wallX = geo.x(6) - t * 0.5;
       final peak = outcome == BuildOutcome.bonkCeiling
-          ? geo.above(h + 1.6) + t * 1.4 // head touches the spikes
+          ? geo.ceilingBottom(h) + t * StageGeometry.heroHeight // head touches the spikes
           : geo.above(math.max(0, s.jump));
       final peakX = outcome == BuildOutcome.bonkCeiling ? geo.x(4.6) : wallX;
       if (a < 0.5) {
@@ -391,9 +435,13 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
         path.add(Offset(geo.x(5 + k + 0.5), geo.above(k + 1)));
       }
       if (outcome == BuildOutcome.cross) {
-        path.add(Offset(offStage, geo.above(h)));
-        final p = _alongPath(path, a);
-        return HeroPose(x: p.dx, y: p.dy, action: a < 1 ? HeroAction.walk : HeroAction.stand, stride: a * 22);
+        if (a < 0.75) {
+          final u = a / 0.75;
+          path.add(Offset(endX, geo.above(h)));
+          final p = _alongPath(path, u);
+          return HeroPose(x: p.dx, y: p.dy, action: HeroAction.walk, stride: u * 22);
+        }
+        return walkThenCheer(endX, geo.above(h), 0.75 + _seg(a, 0.75, 1) * 0.25);
       }
       if (outcome == BuildOutcome.error) return _confused(startX, ground, a, t);
       if (outcome == BuildOutcome.trip) {
@@ -412,7 +460,7 @@ HeroPose heroPoseFor(StageScene s, StageGeometry geo) {
     case Obstacle.guard:
     case Obstacle.toll:
       if (outcome == BuildOutcome.cross) {
-        return walkTo(offStage, ground, _seg(a, 0.25, 1));
+        return walkThenCheer(startX, ground, _seg(a, 0.25, 1));
       }
       if (outcome == BuildOutcome.error) return _confused(startX, ground, a, t);
       final stopX = geo.x(7.45);
@@ -751,7 +799,7 @@ class StagePainter extends CustomPainter {
 
   void _ceiling(Canvas canvas, StageGeometry geo) {
     final t = geo.tile;
-    final bottom = geo.above(scene.size + 1.6);
+    final bottom = geo.ceilingBottom(scene.size);
     final rect = Rect.fromLTRB(geo.x(3.2), -4, geo.width + 4, bottom);
     canvas.drawRect(rect, Paint()..color = _look.groundDark);
     final spikes = Path();

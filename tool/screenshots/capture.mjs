@@ -259,18 +259,24 @@ try {
   await tapScrolling('Next challenge', { timeout: 8000 });
   await sleep(1200);
 
-  // 2. Jump: a variable sets the height. Catch Byte mid-air.
+  // 2. Jump: a variable sets the height. Byte lands and celebrates on top.
   await tap('Put 2 in the blank');
   await tap('Run code');
-  await sleep(1000);
+  await locate('Byte landed on the ledge', { timeout: 12000 });
+  await sleep(300);
   await shot('05b-builder-jump');
   await tapScrolling('Next challenge', { timeout: 8000 });
   await sleep(1200);
 
   // 3. Bridge: a bug on purpose - one block short - then the fix.
   await tap('Put 2 in the blank');
-  await tap('Run code');
-  await sleep(1900);
+  // Click Run without the usual pause, so the fall can be timed from the
+  // moment the last plank appears.
+  const runButton = await locateStable('Run code');
+  await page.mouse.click(runButton.x, runButton.y);
+  // Once the 4th (last) plank is down, Byte walks out and falls. Catch the fall.
+  await locate('The code has built 4 blocks', { timeout: 12000 });
+  await sleep(1150);
   await shot('05c-builder-fall');
   await locate('Try again', { timeout: 8000 });
   await sleep(600);
@@ -278,7 +284,8 @@ try {
   await tapScrolling('Try again');
   await tap('Put 3 in the blank');
   await tap('Run code');
-  await sleep(1300);
+  await locate('Byte made it through', { timeout: 12000 });
+  await sleep(300);
   await shot('05e-builder-bridge');
   await tapScrolling('Next challenge', { timeout: 8000 });
   await sleep(1200);
