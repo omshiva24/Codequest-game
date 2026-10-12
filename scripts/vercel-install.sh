@@ -2,8 +2,12 @@
 # CodeQuest - Copyright (c) 2026 P Om Shiva (M.Tech CSE, Pondicherry University).
 # All rights reserved. Original work - do not copy or reuse without written permission. See LICENSE.
 # Installs a pinned Flutter SDK on the Vercel build machine (Vercel has no
-# Flutter preinstalled). Pinning the version keeps builds reproducible.
+# Flutter preinstalled) and the API's Node packages from the lockfile.
+# Pinning versions keeps builds reproducible.
 set -euo pipefail
+
+# API packages (exact versions from package-lock.json, no install scripts).
+npm ci --omit=dev --ignore-scripts --no-audit --no-fund
 
 FLUTTER_VERSION="${FLUTTER_VERSION:-3.47.7}"
 FLUTTER_DIR="${FLUTTER_DIR:-$PWD/.flutter-sdk}"

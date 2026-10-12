@@ -22,48 +22,24 @@ import {
   isAllowedOrigin,
   validateBody,
 } from './_lib/tutor.js';
+import { BodyError, isCrossSiteFetch, isJsonRequest, readJsonBody, sendJson } from './_lib/http.js';
 
 const allow = createRateLimiter();
 const MODEL = /^[a-z0-9.-]{1,64}$/.test(process.env.GEMINI_MODEL || '')
   ? process.env.GEMINI_MODEL
   : 'gemini-2.5-flash';
 
-function send(res, status, payload) {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.status(status).send(JSON.stringify(payload));
-}
-
-async function readJson(req) {
-  // Vercel parses JSON bodies for us; fall back to reading the stream.
-  if (req.body !== undefined) {
-    if (typeof req.body === 'string') {
-      if (req.body.length > LIMITS.bodyMax) throw new Error('too_large');
-      return JSON.parse(req.body);
-    }
-    return req.body;
-  }
-  let size = 0;
-  const chunks = [];
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > LIMITS.bodyMax) throw new Error('too_large');
-    chunks.push(chunk);
-  }
-  return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
-}
+const send = sendJson;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return send(res, 405, { error: 'Method not allowed.' });
   }
-  if (!isAllowedOrigin(req.headers.origin, req.headers.host)) {
+  if (!isAllowedOrigin(req.headers.origin, req.headers.host) || isCrossSiteFetch(req.headers)) {
     return send(res, 403, { error: 'Origin not allowed.' });
   }
-  const type = String(req.headers['content-type'] || '');
-  if (!type.toLowerCase().startsWith('application/json')) {
+  if (!isJsonRequest(req.headers)) {
     return send(res, 415, { error: 'Send JSON.' });
   }
   const length = Number(req.headers['content-length'] || 0);
@@ -77,9 +53,9 @@ export default async function handler(req, res) {
 
   let body;
   try {
-    body = await readJson(req);
+    body = await readJsonBody(req, LIMITS.bodyMax);
   } catch (err) {
-    const tooLarge = err instanceof Error && err.message === 'too_large';
+    const tooLarge = err instanceof BodyError && err.kind === 'too_large';
     return send(res, tooLarge ? 413 : 400, { error: tooLarge ? 'Request too large.' : 'Invalid JSON.' });
   }
   const checked = validateBody(body);

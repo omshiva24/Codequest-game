@@ -104,9 +104,32 @@ class MemoryProgressStorage implements ProgressStorage {
 }
 
 /// Saves to the browser's localStorage (web) or app preferences (mobile).
-/// Only game progress is stored - no names, emails or other personal data.
+/// Used for the guest player only, so guest progress never leaves the device.
+/// Only game progress and settings are stored - no names, emails or other
+/// personal data.
 class SharedPrefsProgressStorage implements ProgressStorage {
-  static const String key = 'codequest.progress.v1';
+  SharedPrefsProgressStorage({this.key = guestKey});
+
+  /// Where guest progress lives.
+  static const String guestKey = 'codequest.guest.v1';
+
+  /// Where older versions (before player accounts) kept progress.
+  static const String legacyKey = 'codequest.progress.v1';
+
+  final String key;
+
+  /// Moves progress saved by an older version into the guest slot, once.
+  static Future<void> migrateLegacy() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final old = prefs.getString(legacyKey);
+      if (old == null) return;
+      if (prefs.getString(guestKey) == null) await prefs.setString(guestKey, old);
+      await prefs.remove(legacyKey);
+    } catch (e) {
+      debugPrint('CodeQuest: could not move old progress ($e)');
+    }
+  }
 
   @override
   Future<String?> read() async {
@@ -118,6 +141,37 @@ class SharedPrefsProgressStorage implements ProgressStorage {
   Future<void> write(String data) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, data);
+  }
+}
+
+/// Remembers the last accessibility settings on this device, so the very
+/// first screen (before anyone picks a player) already has high contrast,
+/// bigger text or less motion if that is what this device needs.
+/// Settings are not personal data; progress is never stored here.
+class DeviceSettings {
+  static const String key = 'codequest.settings.v1';
+
+  static Future<AppSettings?> load() async {
+    try {
+      final raw = (await SharedPreferences.getInstance()).getString(key);
+      if (raw == null || raw.length > 2000) return null;
+      return AppSettings.fromJson(jsonDecode(raw));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Saves the settings whenever they change.
+  static void keepInSync(ProgressController controller) {
+    var last = jsonEncode(controller.settings.toJson());
+    controller.addListener(() {
+      final now = jsonEncode(controller.settings.toJson());
+      if (now == last) return;
+      last = now;
+      unawaited(SharedPreferences.getInstance()
+          .then((prefs) => prefs.setString(key, now))
+          .catchError((Object _) => false));
+    });
   }
 }
 
@@ -142,6 +196,10 @@ class LevelReward {
 }
 
 /// Holds the player's progress and settings, and saves them.
+///
+/// One controller lives for the whole app. When another player takes over
+/// (guest, or a different account) [switchStorage] wipes everything in
+/// memory first, so one player's progress can never show up for another.
 class ProgressController extends ChangeNotifier {
   ProgressController({required ProgressStorage storage, DateTime Function()? clock})
       : _storage = storage,
@@ -149,7 +207,7 @@ class ProgressController extends ChangeNotifier {
 
   static const int _maxCounter = 10000000;
 
-  final ProgressStorage _storage;
+  ProgressStorage _storage;
   final DateTime Function() _clock;
 
   final Map<String, int> _stars = {};
@@ -217,11 +275,34 @@ class ProgressController extends ChangeNotifier {
 
   int get completedLevels => _stars.values.where((s) => s > 0).length;
 
+  /// True once the player has earned anything at all.
+  bool get hasProgress => _stars.isNotEmpty || _xp > 0 || _coins > 0 || _achievements.isNotEmpty;
+
   bool isUnlocked(Level level) {
     final list = levelsFor(level.lang);
     final i = list.indexWhere((l) => l.id == level.id);
     if (i <= 0) return true;
     return starsFor(list[i - 1].id) > 0;
+  }
+
+  /// Switches to another player's save: clears all progress in memory, then
+  /// loads from [storage]. Settings stay unless the new save has its own, so
+  /// someone who needs high contrast keeps it while switching players.
+  Future<void> switchStorage(ProgressStorage storage) async {
+    _clearProgress();
+    _storage = storage;
+    await load();
+  }
+
+  void _clearProgress() {
+    _stars.clear();
+    _xp = 0;
+    _coins = 0;
+    _streak = 0;
+    _lastPlayDay = null;
+    _bestCombo = 0;
+    _askedDoubt = false;
+    _achievements.clear();
   }
 
   /// Loads saved data. Corrupted or tampered data is ignored safely.
@@ -267,7 +348,7 @@ class ProgressController extends ChangeNotifier {
         if (id is String && achievementById(id) != null) _achievements.add(id);
       }
     }
-    _settings = AppSettings.fromJson(json['settings']);
+    if (json.containsKey('settings')) _settings = AppSettings.fromJson(json['settings']);
   }
 
   int _readCounter(Object? v) => v is int ? v.clamp(0, _maxCounter) : 0;
@@ -371,14 +452,7 @@ class ProgressController extends ChangeNotifier {
 
   /// Clears game progress but keeps accessibility settings.
   void resetProgress() {
-    _stars.clear();
-    _xp = 0;
-    _coins = 0;
-    _streak = 0;
-    _lastPlayDay = null;
-    _bestCombo = 0;
-    _askedDoubt = false;
-    _achievements.clear();
+    _clearProgress();
     unawaited(_save());
     notifyListeners();
   }

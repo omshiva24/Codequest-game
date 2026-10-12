@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../app_scope.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
@@ -12,6 +13,7 @@ import '../widgets/game_ui.dart';
 import '../widgets/scenes.dart';
 import 'about_screen.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 import 'navigation.dart';
 
 /// The "press start" screen: bouncing logo, Byte the owl and a big Play button.
@@ -68,15 +70,11 @@ class TitleScreen extends StatelessWidget {
                           icon: Icons.play_arrow_rounded,
                           size: GameButtonSize.large,
                           expand: true,
-                          onPressed: () => Navigator.of(context)
-                              .pushReplacement(gameRoute<void>(const HomeScreen())),
+                          onPressed: () => startPlaying(context),
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        'Your progress is saved on this device.',
-                        style: TextStyle(color: g.onNightDim, fontSize: 14),
-                      ),
+                      const _PlayerLine(),
                       const SizedBox(height: 22),
                       const CreatorCredit(showCopyright: true),
                     ],
@@ -87,6 +85,62 @@ class TitleScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Play: straight into the game for a logged-in player, otherwise
+/// "Who's playing?" so every person gets their own progress.
+Future<void> startPlaying(BuildContext context) async {
+  final session = SessionScope.maybeRead(context);
+  await session?.ready;
+  if (!context.mounted) return;
+  final navigator = Navigator.of(context);
+  if (session == null || session.hasPlayer) {
+    await navigator.pushReplacement(gameRoute<void>(const HomeScreen()));
+  } else {
+    await navigator.push(gameRoute<void>(const LoginScreen()));
+  }
+}
+
+/// Says who is playing (and lets someone else take over).
+class _PlayerLine extends StatelessWidget {
+  const _PlayerLine();
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GameColors.of(context);
+    final session = SessionScope.maybeWatch(context);
+    final style = TextStyle(color: g.onNightDim, fontSize: 15);
+    if (session == null || session.isGuest) {
+      return Text('Playing as a guest. Progress is saved on this device.', style: style, textAlign: TextAlign.center);
+    }
+    if (session.restoring) {
+      return Text('Checking who is playing...', style: style, textAlign: TextAlign.center);
+    }
+    if (session.isAccount) {
+      return Column(
+        children: [
+          Text(
+            'Welcome back, ${session.displayName}! Your progress is saved to your account.',
+            style: style.copyWith(color: g.onNight),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          GameButton(
+            label: 'Not you? Switch player',
+            icon: Icons.switch_account_rounded,
+            tone: ButtonTone.parchment,
+            size: GameButtonSize.small,
+            onPressed: () => session.switchPlayer(),
+          ),
+        ],
+      );
+    }
+    return Text(
+      'Play as a guest, or log in so your progress is yours alone.',
+      style: style,
+      textAlign: TextAlign.center,
     );
   }
 }

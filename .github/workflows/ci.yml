@@ -32,7 +32,7 @@ jobs:
       - run: flutter build web --release --no-web-resources-cdn
 
   api:
-    name: Test the doubt-solver API (Node)
+    name: Test the API - doubt solver and accounts (Node)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -40,6 +40,9 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm test
 
   android:

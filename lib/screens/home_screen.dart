@@ -15,6 +15,7 @@ import '../widgets/scenes.dart';
 import 'about_screen.dart';
 import 'achievements_screen.dart';
 import 'navigation.dart';
+import 'player_actions.dart';
 import 'settings_screen.dart';
 import 'world_screen.dart';
 
@@ -104,6 +105,8 @@ class _PlayerHud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = AppScope.watch(context);
+    final session = SessionScope.maybeWatch(context);
+    final name = session?.displayName;
     final g = GameColors.of(context);
     final avatar = Stack(
       clipBehavior: Clip.none,
@@ -138,21 +141,36 @@ class _PlayerHud extends StatelessWidget {
 
     final identity = Semantics(
       container: true,
-      label: '${progress.rankTitle}, player level ${progress.playerLevel}',
+      label: '${name == null ? '' : '$name, '}${progress.rankTitle}, player level ${progress.playerLevel}',
       child: ExcludeSemantics(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             avatar,
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                OutlinedText(progress.rankTitle, size: 22),
-                const SizedBox(height: 6),
-                SizedBox(width: 150, child: XpBar(progress: progress.levelProgress)),
-              ],
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (name != null)
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedText(name, size: 24, maxLines: 1),
+                    ),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedText(progress.rankTitle, size: name == null ? 22 : 17, maxLines: 1),
+                  ),
+                  const SizedBox(height: 6),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 150),
+                    child: XpBar(progress: progress.levelProgress),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -180,6 +198,7 @@ class _PlayerHud extends StatelessWidget {
           text: '${progress.totalStars}/${allLevels.length * 3}',
           semanticLabel: '${progress.totalStars} of ${allLevels.length * 3} stars',
         ),
+        if (session != null && session.isAccount) SyncPill(session: session),
       ],
     );
 
@@ -198,6 +217,15 @@ class _PlayerHud extends StatelessWidget {
           tooltip: 'Settings and accessibility',
           onPressed: () => Navigator.of(context).push(gameRoute<void>(const SettingsScreen())),
         ),
+        if (session != null) ...[
+          const SizedBox(width: 10),
+          RoundIconButton(
+            icon: Icons.switch_account_rounded,
+            tooltip: session.isAccount ? 'Switch player or log out' : 'Switch player',
+            tone: ButtonTone.lilac,
+            onPressed: () => confirmSwitchPlayer(context),
+          ),
+        ],
       ],
     );
 
@@ -207,15 +235,32 @@ class _PlayerHud extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [Expanded(child: identity), buttons]),
+              identity,
               const SizedBox(height: 12),
-              pills,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: pills.children,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  buttons,
+                ],
+              ),
             ],
           );
         }
         return Row(
           children: [
-            identity,
+            Flexible(child: identity),
             const SizedBox(width: 16),
             Expanded(child: Align(alignment: Alignment.centerRight, child: pills)),
             const SizedBox(width: 16),

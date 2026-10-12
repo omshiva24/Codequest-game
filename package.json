@@ -1,7 +1,7 @@
 {
   "name": "codequest-api",
   "private": true,
-  "description": "Serverless API for CodeQuest (AI Doubt Buddy). No runtime dependencies.",
+  "description": "Serverless API for CodeQuest: AI Doubt Buddy and player accounts (private cloud saves).",
   "author": "P Om Shiva (M.Tech CSE, Pondicherry University)",
   "license": "UNLICENSED",
   "type": "module",
@@ -10,5 +10,8 @@
   },
   "scripts": {
     "test": "node --test \"api-tests/*.test.js\""
+  },
+  "dependencies": {
+    "@vercel/blob": "2.8.1"
   }
 }

@@ -4,6 +4,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'logic/progress.dart';
+import 'logic/session.dart';
 import 'services/doubt_service.dart';
 
 /// Makes the progress controller and doubt service available to every
@@ -28,6 +29,20 @@ class AppScope extends InheritedNotifier<ProgressController> {
 
   static DoubtService doubts(BuildContext context) =>
       context.getInheritedWidgetOfExactType<AppScope>()!.doubtService;
+}
+
+/// Makes the [SessionController] (who is playing) available to every screen.
+class SessionScope extends InheritedNotifier<SessionController> {
+  const SessionScope({super.key, required SessionController session, required super.child})
+      : super(notifier: session);
+
+  /// Rebuilds when the player changes. Null when there is no session (some tests).
+  static SessionController? maybeWatch(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SessionScope>()?.notifier;
+
+  /// Use in callbacks.
+  static SessionController? maybeRead(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<SessionScope>()?.notifier;
 }
 
 /// True when the player (or their device) asked for less motion.
