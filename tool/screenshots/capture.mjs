@@ -9,11 +9,16 @@
 //
 // It serves build/web locally with the same security headers as vercel.json,
 // so it also checks that the Content-Security-Policy does not break the app.
+// /api/account runs the real account API code with an in-memory store, so the
+// demo player "Om" really signs up and logs in (no cloud storage needed).
 
 import { createServer } from 'node:http';
 import { mkdir, readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import puppeteer from 'puppeteer';
+
+import { createAccountHandler } from '../../api/_lib/account-handler.js';
+import { createMemoryStore } from '../../api/_lib/store.js';
 
 const ROOT = resolve(process.env.WEB_ROOT || 'build/web');
 const OUT = resolve(process.env.OUT_DIR || 'docs/screenshots');
@@ -40,8 +45,30 @@ const TYPES = {
   '.otf': 'font/otf',
 };
 
+const accountApi = createAccountHandler({ store: createMemoryStore(), env: {} });
+
+/** Runs a Vercel-style (req.body, res.status().send()) handler on node:http. */
+async function runVercelHandler(handler, req, res) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const raw = Buffer.concat(chunks).toString('utf8');
+  const vercelRes = {
+    setHeader: (key, value) => res.setHeader(key, value),
+    status(code) {
+      res.statusCode = code;
+      return this;
+    },
+    send: (body) => res.end(body),
+  };
+  await handler({ method: req.method, headers: req.headers, body: raw === '' ? undefined : raw }, vercelRes);
+}
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
+  if (url.pathname === '/api/account') {
+    await runVercelHandler(accountApi, req, res);
+    return;
+  }
   if (url.pathname.startsWith('/api/')) {
     res.writeHead(503, { 'Content-Type': 'application/json' });
     res.end('{"error":"AI tutor is not configured."}');
@@ -164,6 +191,15 @@ async function tap(text, opts) {
   await sleep(700);
 }
 
+/** Clicks a text field (found by its label) and types into it. */
+async function typeInto(label, text) {
+  const p = await locateStable(label, { exact: true });
+  await page.mouse.click(p.x, p.y);
+  await sleep(400);
+  await page.keyboard.type(text, { delay: 25 });
+  await sleep(300);
+}
+
 async function shot(name) {
   await sleep(500);
   await page.screenshot({ path: join(OUT, `${name}.png`) });
@@ -242,9 +278,23 @@ async function desktopShots() {
     recordLoop();
   }
   await shot('00-title');
+
+  // Who's playing? Each player gets their own progress.
   await tap('Play', { exact: true });
-  await locate('Choose your world');
-  await sleep(900);
+  await locate('Play as guest');
+  await sleep(1200);
+  await shot('00b-who-is-playing');
+  await tapScrolling('New here? Create an account');
+  await sleep(600);
+  await typeInto('Player name', 'Om');
+  await typeInto('Email', 'om@codequest.demo');
+  await typeInto('Password', 'demo-pass-2026');
+  await page.keyboard.press('Tab');
+  await sleep(500);
+  await shot('00c-create-account');
+  await tapScrolling('Create account', { exact: true });
+  await locate('Choose your world', { timeout: 20000 });
+  await sleep(1200);
   await shot('01-home');
 
   // World map
@@ -383,10 +433,13 @@ async function desktopShots() {
   // High-contrast mode
   await goHome();
   await tap('Settings and accessibility');
-  await tap('High contrast');
+  await locate('Playing as Om');
+  await sleep(800);
+  await shot('20-player-settings');
+  await tapScrolling('High contrast');
   await sleep(800);
   await shot('14-high-contrast');
-  await tap('High contrast');
+  await tapScrolling('High contrast');
 
   // The creator's message ("Why I made this" on the title screen)
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
@@ -420,6 +473,15 @@ async function phoneShots() {
   await locate('Run code'); // make sure the game really opened
   await sleep(1500);
   await shot('18-mobile-builder');
+
+  // Hand the phone to a friend: switch player, and they choose who plays.
+  await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle0' });
+  await tapScrolling('Not you? Switch player', { timeout: 60000 });
+  await sleep(800);
+  await tap('Play', { exact: true });
+  await locate('Play as guest');
+  await sleep(1200);
+  await shot('15b-mobile-who-is-playing');
 }
 
 try {
