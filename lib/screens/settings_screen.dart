@@ -80,7 +80,7 @@ class SettingsScreen extends StatelessWidget {
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text('Reduce motion', style: displayStyle(20, color: g.ink)),
-                    subtitle: Text('Stops moving scenes, gates, shakes and confetti.', style: subtitleStyle),
+                    subtitle: Text('Stops moving scenes, shakes and confetti. Byte jumps straight to the result.', style: subtitleStyle),
                     value: settings.reduceMotion,
                     onChanged: (v) => progress.updateSettings(settings.copyWith(reduceMotion: v)),
                   ),
@@ -122,25 +122,6 @@ class SettingsScreen extends StatelessWidget {
                 ],
                 selected: {settings.textScale},
                 onSelectionChanged: (s) => progress.updateSettings(settings.copyWith(textScale: s.first)),
-              ),
-            ),
-            section(
-              'Runner timer',
-              ButtonTone.gold,
-              Icons.timer_rounded,
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SegmentedButton<TimerMode>(
-                    segments: [
-                      for (final mode in TimerMode.values) ButtonSegment(value: mode, label: Text(mode.label)),
-                    ],
-                    selected: {settings.timerMode},
-                    onSelectionChanged: (s) => progress.updateSettings(settings.copyWith(timerMode: s.first)),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(settings.timerMode.description, style: subtitleStyle),
-                ],
               ),
             ),
             section(
