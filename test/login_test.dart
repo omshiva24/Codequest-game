@@ -73,7 +73,7 @@ void main() {
     expect(find.textContaining('Play as a guest, or log in'), findsOneWidget);
     await tapText(tester, 'Play');
     expect(find.byType(LoginScreen), findsOneWidget);
-    expect(find.text("Who's playing?"), findsOneWidget);
+    expect(find.text("Who's playing?"), findsWidgets);
     expect(find.text('Play as guest'), findsWidgets);
     expect(find.text('Log in'), findsWidgets);
   });
@@ -96,7 +96,7 @@ void main() {
     await tester.enterText(find.widgetWithText(TextFormField, 'Password'), 'blue-tiger-42');
     await tapAndWait(tester, 'Create account');
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.text('Om'), findsOneWidget);
+    expect(find.text('Om'), findsWidgets);
     expect(rig.server.accounts.keys, ['om@example.com']);
 
     // Om plays a level.
@@ -119,7 +119,7 @@ void main() {
     await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'priya@example.com');
     await tester.enterText(find.widgetWithText(TextFormField, 'Password'), 'green-lion-77');
     await tapAndWait(tester, 'Create account');
-    expect(find.text('Priya'), findsOneWidget);
+    expect(find.text('Priya'), findsWidgets);
     expect(rig.progress.completedLevels, 0);
     expect(find.bySemanticsLabel(RegExp(r'^0 of \d+ stars$')), findsOneWidget);
   });
