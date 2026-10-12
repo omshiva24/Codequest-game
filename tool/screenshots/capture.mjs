@@ -163,8 +163,11 @@ async function shot(name) {
   console.log('saved', name);
 }
 
-async function scroll(dy, x = 640) {
-  await page.mouse.move(x, 500);
+async function scroll(dy, x) {
+  // Scroll inside the window: phones are much narrower than desktops.
+  const view = page.viewport() ?? { width: 1280, height: 860 };
+  const px = Math.min(x ?? view.width / 2, view.width - 10);
+  await page.mouse.move(px, Math.min(500, view.height / 2));
   await page.mouse.wheel({ deltaY: dy });
   await sleep(600);
 }
@@ -179,7 +182,7 @@ async function tapScrolling(text, opts = {}) {
       return;
     }
     // Wide screens have two scrolling columns; try both.
-    await scroll(450, i % 2 === 0 ? 640 : 1000);
+    await scroll(450, i % 2 === 0 ? undefined : 1000);
   }
   throw new Error(`Could not scroll to "${text}"`);
 }
