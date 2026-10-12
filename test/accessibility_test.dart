@@ -172,10 +172,7 @@ void main() {
       );
       await tester.enterText(find.byType(TextFormField).at(0), 'om@example.com');
       await tester.enterText(find.byType(TextFormField).at(1), 'wrong-password');
-      await tester.runAsync(() async {
-        await tester.tap(find.widgetWithText(GameButton, 'Log in'));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-      });
+      await tester.tap(find.widgetWithText(GameButton, 'Log in'));
       await tester.pumpAndSettle();
       expect(find.text('Email or password is wrong.'), findsOneWidget);
       await _expectAccessible(tester);
