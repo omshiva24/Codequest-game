@@ -13,6 +13,22 @@ Built with **Flutter** (one codebase for web + Android/iOS), deployed on **Verce
 
 > Full-quality demo video: [docs/demo.mp4](docs/demo.mp4)
 
+## 🛠️ Tech Stack
+
+![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white) ![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Google%20Gemini%20API-8E75B2?logo=googlegemini&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white) ![Puppeteer](https://img.shields.io/badge/Puppeteer-40B5A4?logo=puppeteer&logoColor=white) ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white)
+
+| Area | Technologies |
+|---|---|
+| App | Flutter, Dart (strict analyzer), Material Design, CustomPainter graphics and animations, InheritedNotifier state management, shared_preferences |
+| Platforms | Web, Android (APK), iOS |
+| Backend | Node.js serverless function on Vercel (zero dependencies), REST API, rate limiting, input validation |
+| AI | Google Gemini API for the "Doubt Buddy" tutor, with an offline knowledge-base fallback |
+| Audio | Web Audio API (8-bit sound effects made in code) |
+| Testing | flutter_test (unit, widget and accessibility tests), Node.js test runner |
+| DevOps | GitHub Actions CI (analyze, test, web build, Android APK build), Puppeteer (automated screenshots and demo video), Dependabot, Vercel |
+
+**Skills:** Flutter · Dart · Cross-platform mobile and web development · Game design · UI/UX · Node.js · Serverless · REST API · Generative AI integration · Unit and widget testing · CI/CD · Web security (CSP) · Accessibility
+
 ---
 
 ## ❤️ Why I made CodeQuest
